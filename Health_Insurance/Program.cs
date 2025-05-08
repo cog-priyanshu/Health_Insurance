@@ -1,7 +1,19 @@
+using Health_Insurance.Data;
+using Health_Insurance.Models; // Added if needed for any Program.cs logic, though less common
+using Health_Insurance.Services; // Add this using statement
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// Configure the database context to use SQL Server
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Register the Enrollment Service for dependency injection
+builder.Services.AddScoped<IEnrollmentService, EnrollmentService>(); // Add this line
 
 var app = builder.Build();
 
@@ -25,3 +37,4 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
+

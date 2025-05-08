@@ -1,0 +1,72 @@
+﻿@model IEnumerable<Health_Insurance.Models.Enrollment>
+@* Ensure the model namespace is correct based on your project name *@
+
+@{
+    ViewData["Title"] = "Your Enrolled Policies";
+}
+
+<h1>Your Enrolled Policies</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Policy.PolicyName) @* Display Policy Name from the related Policy *@
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Policy.CoverageAmount) @* Display Coverage Amount from the related Policy *@
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.EnrollmentDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Status)
+            </th>
+            <th></th> @* Column for action links (Cancel) *@
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Policy.PolicyName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Policy.CoverageAmount)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.EnrollmentDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Status)
+                </td>
+                <td>
+                    @* Form for cancelling enrollment. Posts to the CancelEnrollment action. *@
+                    @* Need to pass EnrollmentId and EmployeeId for redirection *@
+                    <form asp-action="CancelEnrollment" method="post">
+                        <input type="hidden" name="enrollmentId" value="@item.EnrollmentId" />
+                        <input type="hidden" name="employeeId" value="@item.EmployeeId" /> @* Pass EmployeeId for redirection *@
+                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to cancel this enrollment?');">Cancel</button>
+                        @* Add CSRF token *@
+                        @Html.AntiForgeryToken()
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@* Display error message if any *@
+@if (ViewBag.ErrorMessage != null)
+{
+    <div class="alert alert-danger mt-3">
+        @ViewBag.ErrorMessage
+    </div>
+}
+
+<div>
+    @* Link back to the list of available policies *@
+    <a asp-action="Index">View Available Policies</a>
+</div>
+

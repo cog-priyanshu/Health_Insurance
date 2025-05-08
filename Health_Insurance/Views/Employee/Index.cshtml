@@ -1,0 +1,71 @@
+﻿@model IEnumerable<Health_Insurance.Models.Employee>
+@* Ensure the model namespace is correct based on your project name *@
+
+@{
+    ViewData["Title"] = "Employee List";
+}
+
+<h1>Employee List</h1>
+
+<p>
+    @* Link to the Create action to add a new employee *@
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @* Display name of the property from the model *@
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Email)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Phone)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Designation)
+            </th>
+            <th>
+                @* Accessing the Organization's name via the navigation property *@
+                @Html.DisplayNameFor(model => model.Organization) @* DisplayNameFor the navigation property itself *@
+            </th>
+            <th></th> @* Column for action links (Edit, Details, Delete) *@
+        </tr>
+    </thead>
+    <tbody>
+        @* Loop through each employee in the model (the list of employees) *@
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @* Display the value of the property for the current employee *@
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Email)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Phone)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Designation)
+                </td>
+                <td>
+                    @* Display the Organization Name for the current employee *@
+                    @Html.DisplayFor(modelItem => item.Organization.OrganizationName)
+                </td>
+                <td>
+                    @* Action links for each employee *@
+                    @* asp-action specifies the controller action *@
+                    @* asp-route-id passes the EmployeeId as a route parameter *@
+                    <a asp-action="Edit" asp-route-id="@item.EmployeeId">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.EmployeeId">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.EmployeeId">Delete</a> @* Include Delete link if you have the Delete action/view *@
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+

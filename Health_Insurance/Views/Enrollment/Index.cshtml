@@ -1,0 +1,62 @@
+﻿@model IEnumerable<Health_Insurance.Models.Policy>
+@* Ensure the model namespace is correct based on your project name *@
+
+@{
+    ViewData["Title"] = "Available Policies";
+}
+
+<h1>Available Policies for Enrollment</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.PolicyName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CoverageAmount)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PremiumAmount)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PolicyType)
+            </th>
+            <th></th> @* Column for action links (Enroll) *@
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.PolicyName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CoverageAmount)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.PremiumAmount)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.PolicyType)
+                </td>
+                <td>
+                    @* Link to the Enroll action. You'll need to pass the EmployeeId. *@
+                    @* For testing, you might hardcode an EmployeeId or get it from a user session. *@
+                    <a asp-action="Enroll" asp-route-policyId="@item.PolicyId" asp-route-employeeId="1">Enroll (Employee 1)</a>
+                    @* Replace "1" with logic to get the actual employee ID *@
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@* Display error message if any *@
+@if (ViewBag.ErrorMessage != null)
+{
+    <div class="alert alert-danger mt-3">
+        @ViewBag.ErrorMessage
+    </div>
+}
+
