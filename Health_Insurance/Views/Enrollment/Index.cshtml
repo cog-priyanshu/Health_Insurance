@@ -43,9 +43,9 @@
                 </td>
                 <td>
                     @* Link to the Enroll action. You'll need to pass the EmployeeId. *@
-                    @* For testing, you might hardcode an EmployeeId or get it from a user session. *@
-                    <a asp-action="Enroll" asp-route-policyId="@item.PolicyId" asp-route-employeeId="1">Enroll (Employee 1)</a>
-                    @* Replace "1" with logic to get the actual employee ID *@
+                    @* For testing, we are hardcoding EmployeeId="12" based on your data. *@
+                    <a asp-action="Enroll" asp-route-policyId="@item.PolicyId" asp-route-employeeId="12">Enroll (Employee 12)</a>
+                    @* Replace "12" with logic to get the actual employee ID in a real application *@
                 </td>
             </tr>
         }
@@ -59,4 +59,5 @@
         @ViewBag.ErrorMessage
     </div>
 }
+
 

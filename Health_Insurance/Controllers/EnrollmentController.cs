@@ -30,6 +30,7 @@ namespace Health_Insurance.Controllers // Ensure this namespace is correct
             // Use the service to get all available policies
             var policies = await _enrollmentService.GetAllPoliciesAsync();
             // Pass the list of policies to the Index view
+
             return View(policies);
         }
 
