@@ -32,7 +32,8 @@ namespace Health_Insurance.Models // Note: This namespace might need to be updat
 
         // Navigation property to the related Organization
         [ForeignKey("OrganizationId")] // Specifies the foreign key property
-        public virtual Organization Organization { get; set; }
+
+        public virtual Organization? Organization { get; set; }
 
         // Navigation property for Enrollments (if needed later)
         // public virtual ICollection<Enrollment> Enrollments { get; set; }

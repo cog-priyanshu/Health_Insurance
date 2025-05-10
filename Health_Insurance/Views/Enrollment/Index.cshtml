@@ -7,7 +7,17 @@
 
 <h1>Available Policies for Enrollment</h1>
 
-<table class="table">
+@* Employee Selection Dropdown *@
+<div class="form-group col-md-4">
+    <label for="employeeSelect">Select Employee:</label>
+    @* Use asp-items to populate the dropdown from ViewBag.EmployeeList *@
+    <select id="employeeSelect" class="form-control" asp-items="ViewBag.EmployeeList">
+        <option value="">-- Select Employee --</option> @* Optional: Add a default empty option *@
+    </select>
+</div>
+
+<table class="table mt-3">
+    @* Added margin-top for spacing *@
     <thead>
         <tr>
             <th>
@@ -42,10 +52,12 @@
                     @Html.DisplayFor(modelItem => item.PolicyType)
                 </td>
                 <td>
-                    @* Link to the Enroll action. You'll need to pass the EmployeeId. *@
-                    @* For testing, we are hardcoding EmployeeId="12" based on your data. *@
-                    <a asp-action="Enroll" asp-route-policyId="@item.PolicyId" asp-route-employeeId="12">Enroll (Employee 12)</a>
-                    @* Replace "12" with logic to get the actual employee ID in a real application *@
+                    @* Link to the Enroll action. This link will be updated by JavaScript. *@
+                    @* We add a data-employee-id attribute to store the employee ID *@
+                    @* The initial value can be empty or a default *@
+                    <a href="#" class="enroll-link"
+                       data-policy-id="@item.PolicyId"
+                       data-employee-id="">Enroll (Select Employee)</a>
                 </td>
             </tr>
         }
@@ -59,5 +71,47 @@
         @ViewBag.ErrorMessage
     </div>
 }
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function () {
+            // Get references to the dropdown and all enroll links
+            var employeeSelect = $('#employeeSelect');
+            var enrollLinks = $('.enroll-link');
+
+            // Function to update the href of the enroll links
+            function updateEnrollLinks() {
+                var selectedEmployeeId = employeeSelect.val(); // Get the selected employee ID
+
+                // Iterate over each enroll link
+                enrollLinks.each(function () {
+                    var link = $(this);
+                    var policyId = link.data('policy-id'); // Get the policy ID from the data attribute
+
+                    if (selectedEmployeeId) {
+                        // If an employee is selected, update the href
+                        link.attr('href', '/Enrollment/Enroll?policyId=' + policyId + '&employeeId=' + selectedEmployeeId);
+                        link.text('Enroll (Employee ' + selectedEmployeeId + ')'); // Update link text
+                    } else {
+                        // If no employee is selected, disable the link or set a placeholder href
+                        link.attr('href', '#'); // Set href to # or remove it
+                        link.text('Enroll (Select Employee)'); // Reset link text
+                    }
+                });
+            }
+
+            // Call the function initially to set links based on the default dropdown value
+            updateEnrollLinks();
+
+            // Attach the update function to the change event of the dropdown
+            employeeSelect.on('change', updateEnrollLinks);
+        });
+    </script>
+}
+
 
 

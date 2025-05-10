@@ -11,11 +11,16 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        @* Form for creating a new employee. Posts data to the Create action. *@
-        <form asp-action="Create">
+        @* Form for creating a new employee. Posts data to the Create action of the Employee controller. *@
+        @* asp-action="Create" targets the Create action *@
+        @* asp-controller="Employee" explicitly targets the Employee controller (optional if within Employee controller, but good practice) *@
+        <form asp-action="Create" asp-controller="Employee" method="post">
             @* This adds a hidden field for security (CSRF prevention) *@
+            @Html.AntiForgeryToken() @* Ensure this is present for [ValidateAntiForgeryToken] *@
+
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            @* Input fields for each property of the Employee model *@
+
+            @* Input fields for other properties *@
             <div class="form-group">
                 <label asp-for="Name" class="control-label"></label>
                 <input asp-for="Name" class="form-control" />
@@ -42,13 +47,18 @@
                 <input asp-for="Designation" class="form-control" />
                 <span asp-validation-for="Designation" class="text-danger"></span>
             </div>
+
+            @* Dropdown for selecting Organization *@
             <div class="form-group">
                 <label asp-for="OrganizationId" class="control-label"></label>
-                @* This would typically be a dropdown populated from ViewBag.Organizations *@
-                @* For simplicity now, it's a text input. You'll change this later. *@
-                <input asp-for="OrganizationId" class="form-control" />
+                @* The asp-items tag helper populates the dropdown using the SelectList from ViewBag *@
+                @* ViewBag.OrganizationId accesses ViewData["OrganizationId"] *@
+                <select asp-for="OrganizationId" class="form-control" asp-items="ViewBag.OrganizationId">
+                    <option value="">-- Select Organization --</option> @* Optional: Add a default empty option *@
+                </select>
                 <span asp-validation-for="OrganizationId" class="text-danger"></span>
             </div>
+
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>
@@ -66,5 +76,4 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 }
-
 
