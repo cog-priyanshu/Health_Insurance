@@ -109,4 +109,3 @@ namespace Health_Insurance.Controllers // Ensure this namespace is correct
     }
 }
 
-

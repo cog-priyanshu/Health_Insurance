@@ -1,0 +1,86 @@
+﻿@model Health_Insurance.Models.Claim
+@* Ensure the model namespace is correct based on your project name *@
+
+@{
+    ViewData["Title"] = "Update Claim Status";
+}
+
+<h1>Update Claim Status</h1>
+
+<h4>Claim</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        @* Form for updating claim status. Posts data to the UpdateClaimStatus action. *@
+        <form asp-action="UpdateClaimStatus">
+            @* Hidden field for CSRF protection *@
+            @Html.AntiForgeryToken()
+
+            @* Hidden input for the ClaimId, needed to identify which claim is being updated *@
+            <input type="hidden" asp-for="ClaimId" />
+
+            @* Validation summary to display all model errors *@
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            @* Display current claim details (read-only) *@
+            <div class="form-group">
+                <label asp-for="ClaimId" class="control-label"></label>
+                <input asp-for="ClaimId" class="form-control" readonly /> @* Make read-only *@
+            </div>
+            <div class="form-group">
+                <label asp-for="EnrollmentId" class="control-label"></label>
+                <input asp-for="EnrollmentId" class="form-control" readonly /> @* Make read-only *@
+            </div>
+            <div class="form-group">
+                <label asp-for="ClaimAmount" class="control-label"></label>
+                <input asp-for="ClaimAmount" class="form-control" readonly /> @* Make read-only *@
+            </div>
+            <div class="form-group">
+                <label asp-for="ClaimDate" class="control-label"></label>
+                <input asp-for="ClaimDate" class="form-control" readonly /> @* Make read-only *@
+            </div>
+            <div class="form-group">
+                <label asp-for="ClaimReason" class="control-label"></label>
+                <textarea asp-for="ClaimReason" class="form-control" readonly></textarea> @* Make read-only *@
+            </div>
+            <div class="form-group">
+                <label asp-for="ClaimStatus" class="control-label"></label>
+                @* Display current status (read-only) *@
+                <input asp-for="ClaimStatus" class="form-control" readonly /> @* Make read-only *@
+            </div>
+
+
+            @* Dropdown for selecting the NEW status *@
+            @* Requires ViewBag.Statuses populated in the controller *@
+            <div class="form-group">
+                <label for="newClaimStatus" class="control-label">New Status:</label>
+                @* Using asp-for="ClaimStatus" here will bind the selected value to the model property *@
+                <select id="newClaimStatus" asp-for="ClaimStatus" class="form-control" asp-items="ViewBag.Statuses">
+                    <option value="">-- Select New Status --</option> @* Optional: Add a default empty option *@
+                </select>
+                @* Displays validation errors for ClaimStatus *@
+                <span asp-validation-for="ClaimStatus" class="text-danger"></span>
+            </div>
+
+
+            <div class="form-group mt-3">
+                @* Added margin-top to button *@
+                <input type="submit" value="Update Status" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    @* Link back to the claim details page *@
+    <a asp-action="GetClaimDetails" asp-route-id="@Model.ClaimId">Back to Details</a> |
+    @* Link back to the list of all claims *@
+    <a asp-action="ListAllClaims">Back to List</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+

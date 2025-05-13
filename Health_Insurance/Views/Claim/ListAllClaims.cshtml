@@ -1,0 +1,81 @@
+﻿@model IEnumerable<Health_Insurance.Models.Claim>
+@* Ensure the model namespace is correct based on your project name *@
+
+@{
+    ViewData["Title"] = "All Claims";
+}
+
+<h1>All Claims</h1>
+
+<p>
+    @* Link to the Submit Claim page *@
+    <a asp-action="SubmitClaim">Submit New Claim</a>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.ClaimId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Enrollment) @* Display name for the navigation property *@
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ClaimAmount)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ClaimReason)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ClaimDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ClaimStatus)
+            </th>
+            <th></th> @* Column for action links (Details, Update Status) *@
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ClaimId)
+                </td>
+                <td>
+                    @* Display details from the related Enrollment and Policy *@
+                    Enrollment ID: @Html.DisplayFor(modelItem => item.EnrollmentId)<br />
+                    Policy: @Html.DisplayFor(modelItem => item.Enrollment.Policy.PolicyName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ClaimAmount)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ClaimReason)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ClaimDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ClaimStatus)
+                </td>
+                <td>
+                    @* Action links for each claim *@
+                    <a asp-action="GetClaimDetails" asp-route-id="@item.ClaimId">Details</a> |
+                    <a asp-action="UpdateClaimStatus" asp-route-id="@item.ClaimId">Update Status</a>
+                    @* You might add a Delete link here as well if needed *@
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@* Display error message if any (from controller redirects) *@
+@if (ViewBag.ErrorMessage != null)
+{
+    <div class="alert alert-danger mt-3">
+        @ViewBag.ErrorMessage
+    </div>
+}
+

@@ -1,8 +1,8 @@
 ﻿// Data/ApplicationDbContext.cs
-using Health_Insurance.Models; // Make sure namespace is correct based on your project name
+using Health_Insurance.Models; // Make sure namespace is correct for your Models
 using Microsoft.EntityFrameworkCore;
 
-namespace Health_Insurance.Data // Ensure this namespace is correct based on your project name
+namespace Health_Insurance.Data // Ensure this namespace is correct for your Data folder
 {
     // DbContext is the main class that coordinates Entity Framework functionality
     // for a given data model. It MUST inherit from DbContext.
@@ -18,30 +18,55 @@ namespace Health_Insurance.Data // Ensure this namespace is correct based on you
         // These will map to your database tables.
         public DbSet<Employee> Employees { get; set; }
         public DbSet<Organization> Organizations { get; set; }
-
-        // Add DbSets for the Policy and Enrollment models
         public DbSet<Policy> Policies { get; set; }
         public DbSet<Enrollment> Enrollments { get; set; }
-        // Add DbSets for other entities (Policy, Enrollment, Claim) as you create their models.
-        // public DbSet<Policy> Policies { get; set; }
-        // public DbSet<Enrollment> Enrollments { get; set; }
-        // public DbSet<Claim> Claims { get; set; }
+
+        // Add DbSet for the Claim model
+        public DbSet<Claim> Claims { get; set; } // Add this line
+
 
         // Optional: Configure model properties using the Fluent API
         // This is an alternative to Data Annotations (like [Required], [StringLength])
+        // You can configure relationships, data types, etc. here.
         // protected override void OnModelCreating(ModelBuilder modelBuilder)
         // {
-        //     // Example: Configure string length for Employee Name
-        //     modelBuilder.Entity<Employee>()
-        //         .Property(e => e.Name)
-        //         .HasMaxLength(100);
+        //     // Example: Configure the relationship between Employee and Enrollment
+        //     modelBuilder.Entity<Enrollment>()
+        //         .HasOne(e => e.Employee) // An Enrollment has one Employee
+        //         .WithMany() // An Employee can have many Enrollments (or specify the navigation property in Employee model)
+        //         .HasForeignKey(e => e.EmployeeId); // The foreign key property
 
-        //     // Configure the relationship between Employee and Organization
-        //     modelBuilder.Entity<Employee>()
-        //         .HasOne(e => e.Organization) // An Employee has one Organization
-        //         .WithMany() // An Organization can have many Employees (or specify the navigation property in Organization model)
-        //         .HasForeignKey(e => e.OrganizationId); // The foreign key property
+        //     // Example: Configure the relationship between Policy and Enrollment
+        //      modelBuilder.Entity<Enrollment>()
+        //         .HasOne(e => e.Policy) // An Enrollment has one Policy
+        //         .WithMany() // A Policy can have many Enrollments (or specify the navigation property in Policy model)
+        //         .HasForeignKey(e => e.PolicyId); // The foreign key property
+
+        //     // Configure PolicyType and Status to be stored as strings
+        //     modelBuilder.Entity<Policy>()
+        //         .Property(p => p.PolicyType)
+        //         .HasConversion<string>(); // Optional, but good practice if you were using enums
+
+        //     modelBuilder.Entity<Enrollment>()
+        //         .Property(e => e.Status)
+        //         .HasConversion<string>(); // Optional, but good practice if you were using enums
+
+        //     // Configure ClaimStatus to be stored as a string
+        //     modelBuilder.Entity<Claim>()
+        //         .Property(c => c.ClaimStatus)
+        //         .HasConversion<string>(); // Optional, but good practice if you were using enums
+
+        //     // Configure the relationship between Enrollment and Claim
+        //     modelBuilder.Entity<Claim>()
+        //         .HasOne(c => c.Enrollment) // A Claim has one Enrollment
+        //         .WithMany() // An Enrollment can have many Claims (or specify the navigation property in Enrollment model)
+        //         .HasForeignKey(c => c.EnrollmentId); // The foreign key property
+
+
+        //     // Base class OnModelCreating call
+        //     base.OnModelCreating(modelBuilder);
         // }
     }
 }
+
 
