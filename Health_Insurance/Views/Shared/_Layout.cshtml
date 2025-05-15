@@ -7,29 +7,56 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Health_Insurance.styles.css" asp-append-version="true" />
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 <body>
+    @* This is the HTML for the Navbar. You should place this in your Views/Shared/_Layout.cshtml file. *@
+    @* Ensure you have Bootstrap 5 CSS and JS included in your _Layout.cshtml *@
+
+    @* This is the HTML for the Navbar. You should place this in your Views/Shared/_Layout.cshtml file. *@
+    @* Ensure you have Bootstrap 5 CSS and JS included in your _Layout.cshtml *@
+
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Health_Insurance</a>
+                @* Application Brand/Name *@
+                @* Use asp-area, asp-controller, asp-action to link to your Home page or other main page *@
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Health Insurance System</a>
+                @* Toggle button for collapsing the navbar on smaller screens *@
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
+                @* Navbar links container - collapses on smaller screens *@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
+                        @* Link to Employee Page *@
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            @* Use asp-controller and asp-action for MVC routing *@
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Employee" asp-action="Index">Employees</a>
                         </li>
+                        @* Link to Enrollment Page *@
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            @* Use asp-controller and asp-action for MVC routing *@
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Enrollment" asp-action="Index">Enrollments</a>
                         </li>
+                        @* Link to Claims Page (Optional, based on your module) *@
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Claim" asp-action="ListAllClaims">Claims</a>
+                        </li>
+                        @* Link to Premium Calculator Page (Optional, based on your module) *@
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="PremiumCalculator" asp-action="CalculatePremium">Premium Calculator</a>
+                        </li>
+                        @* Add other navigation links here *@
                     </ul>
                 </div>
             </div>
         </nav>
     </header>
+
+
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
