@@ -2,10 +2,12 @@
 @* Ensure the model namespace is correct based on your project name *@
 
 @{
-    ViewData["Title"] = "Employee Details";
+    ViewData["Title"] = "Delete Employee";
 }
 
-<h1 class="mb-4">Employee Details</h1>
+<h1 class="mb-4 text-danger">Delete Employee</h1> @* Highlight delete heading in danger color *@
+
+<h3 class="mb-3">Are you sure you want to delete this?</h3> @* Added margin-bottom *@
 
 <div>
     <h4>Employee</h4>
@@ -13,7 +15,7 @@
     @* Use Bootstrap row and column for layout and display classes *@
     <dl class="row">
         @* Use dl, dt, dd with row/col for definition list layout *@
-        @* Displaying each property of the Employee model *@
+        @* Displaying properties of the Employee to be deleted *@
         <dt class="col-sm-3">
             @* Use column for label *@
             @Html.DisplayNameFor(model => model.Name)
@@ -35,12 +37,6 @@
             @Html.DisplayFor(model => model.Phone)
         </dd>
         <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.Address)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.Address)
-        </dd>
-        <dt class="col-sm-3">
             @Html.DisplayNameFor(model => model.Designation)
         </dt>
         <dd class="col-sm-9">
@@ -53,12 +49,16 @@
             @Html.DisplayFor(model => model.Organization.OrganizationName)
         </dd>
     </dl>
-</div>
-<div class="mt-3">
-    @* Added margin-top *@
-    @* Link to the Edit action, passing the current EmployeeId with Bootstrap button class *@
-    <a asp-action="Edit" asp-route-id="@Model.EmployeeId" class="btn btn-primary">Edit</a> |
-    @* Link back to the Employee Index page *@
-    <a asp-action="Index">Back to List</a>
+
+    @* Form for confirming deletion. Posts to the DeleteConfirmed action. *@
+    <form asp-action="Delete" class="mt-3">
+        @* Added margin-top to form *@
+        @* Hidden field to pass the EmployeeId to the DeleteConfirmed action *@
+        <input type="hidden" asp-for="EmployeeId" />
+        @* Use Bootstrap button classes *@
+        <input type="submit" value="Delete" class="btn btn-danger" /> |
+        @* Link back to the Employee Index page *@
+        <a asp-action="Index">Back to List</a>
+    </form>
 </div>
 

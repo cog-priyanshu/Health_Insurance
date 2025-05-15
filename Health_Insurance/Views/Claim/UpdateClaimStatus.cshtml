@@ -5,12 +5,14 @@
     ViewData["Title"] = "Update Claim Status";
 }
 
-<h1>Update Claim Status</h1>
+<h1 class="mb-4">Update Claim Status</h1>
 
 <h4>Claim</h4>
 <hr />
+@* Use Bootstrap row and column for layout *@
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-6">
+        @* Use a column to limit the form width *@
         @* Form for updating claim status. Posts data to the UpdateClaimStatus action. *@
         <form asp-action="UpdateClaimStatus">
             @* Hidden field for CSRF protection *@
@@ -19,59 +21,67 @@
             @* Hidden input for the ClaimId, needed to identify which claim is being updated *@
             <input type="hidden" asp-for="ClaimId" />
 
-            @* Validation summary to display all model errors *@
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            @* Validation summary with Bootstrap text-danger class *@
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div> @* Added margin-bottom *@
 
-            @* Display current claim details (read-only) *@
-            <div class="form-group">
-                <label asp-for="ClaimId" class="control-label"></label>
+            @* Display current claim details (read-only) with Bootstrap form-group and form-control *@
+            <div class="form-group mb-3">
+                @* Added margin-bottom *@
+                <label asp-for="ClaimId" class="form-label"></label> @* Use form-label for Bootstrap styling *@
                 <input asp-for="ClaimId" class="form-control" readonly /> @* Make read-only *@
             </div>
-            <div class="form-group">
-                <label asp-for="EnrollmentId" class="control-label"></label>
+            <div class="form-group mb-3">
+                @* Added margin-bottom *@
+                <label asp-for="EnrollmentId" class="form-label"></label> @* Use form-label for Bootstrap styling *@
                 <input asp-for="EnrollmentId" class="form-control" readonly /> @* Make read-only *@
             </div>
-            <div class="form-group">
-                <label asp-for="ClaimAmount" class="control-label"></label>
+            <div class="form-group mb-3">
+                @* Added margin-bottom *@
+                <label asp-for="ClaimAmount" class="form-label"></label> @* Use form-label for Bootstrap styling *@
                 <input asp-for="ClaimAmount" class="form-control" readonly /> @* Make read-only *@
             </div>
-            <div class="form-group">
-                <label asp-for="ClaimDate" class="control-label"></label>
+            <div class="form-group mb-3">
+                @* Added margin-bottom *@
+                <label asp-for="ClaimDate" class="form-label"></label> @* Use form-label for Bootstrap styling *@
                 <input asp-for="ClaimDate" class="form-control" readonly /> @* Make read-only *@
             </div>
-            <div class="form-group">
-                <label asp-for="ClaimReason" class="control-label"></label>
+            <div class="form-group mb-3">
+                @* Added margin-bottom *@
+                <label asp-for="ClaimReason" class="form-label"></label> @* Use form-label for Bootstrap styling *@
                 <textarea asp-for="ClaimReason" class="form-control" readonly></textarea> @* Make read-only *@
             </div>
-            <div class="form-group">
-                <label asp-for="ClaimStatus" class="control-label"></label>
+            <div class="form-group mb-3">
+                @* Added margin-bottom *@
+                <label asp-for="ClaimStatus" class="form-label"></label> @* Use form-label for Bootstrap styling *@
                 @* Display current status (read-only) *@
                 <input asp-for="ClaimStatus" class="form-control" readonly /> @* Make read-only *@
             </div>
 
 
-            @* Dropdown for selecting the NEW status *@
+            @* Dropdown for selecting the NEW status with Bootstrap form-group and form-control *@
             @* Requires ViewBag.Statuses populated in the controller *@
-            <div class="form-group">
-                <label for="newClaimStatus" class="control-label">New Status:</label>
+            <div class="form-group mb-3">
+                @* Added margin-bottom *@
+                <label for="newClaimStatus" class="form-label">New Status:</label> @* Use form-label for Bootstrap styling *@
                 @* Using asp-for="ClaimStatus" here will bind the selected value to the model property *@
                 <select id="newClaimStatus" asp-for="ClaimStatus" class="form-control" asp-items="ViewBag.Statuses">
                     <option value="">-- Select New Status --</option> @* Optional: Add a default empty option *@
                 </select>
-                @* Displays validation errors for ClaimStatus *@
+                @* Displays validation errors for ClaimStatus with Bootstrap text-danger *@
                 <span asp-validation-for="ClaimStatus" class="text-danger"></span>
             </div>
 
 
             <div class="form-group mt-3">
                 @* Added margin-top to button *@
-                <input type="submit" value="Update Status" class="btn btn-primary" />
+                <input type="submit" value="Update Status" class="btn btn-primary" /> @* Use Bootstrap button class *@
             </div>
         </form>
     </div>
 </div>
 
-<div>
+<div class="mt-3">
+    @* Added margin-top *@
     @* Link back to the claim details page *@
     <a asp-action="GetClaimDetails" asp-route-id="@Model.ClaimId">Back to Details</a> |
     @* Link back to the list of all claims *@
@@ -83,4 +93,5 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 }
+
 

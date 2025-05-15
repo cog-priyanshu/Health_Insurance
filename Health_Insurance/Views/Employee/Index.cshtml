@@ -5,17 +5,19 @@
     ViewData["Title"] = "Employee List";
 }
 
-<h1>Employee List</h1>
+@* Use Bootstrap heading and margin utility *@
+<h1 class="mb-4">Employee List</h1>
 
+@* Use Bootstrap button class and margin utility *@
 <p>
-    @* Link to the Create action to add a new employee *@
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-primary mb-3">Create New</a>
 </p>
-<table class="table">
+
+@* Apply Bootstrap table classes for styling *@
+<table class="table table-striped table-bordered table-hover">
     <thead>
         <tr>
             <th>
-                @* Display name of the property from the model *@
                 @Html.DisplayNameFor(model => model.Name)
             </th>
             <th>
@@ -28,19 +30,16 @@
                 @Html.DisplayNameFor(model => model.Designation)
             </th>
             <th>
-                @* Accessing the Organization's name via the navigation property *@
-                @Html.DisplayNameFor(model => model.Organization) @* DisplayNameFor the navigation property itself *@
+                @Html.DisplayNameFor(model => model.Organization)
             </th>
             <th></th> @* Column for action links (Edit, Details, Delete) *@
         </tr>
     </thead>
     <tbody>
-        @* Loop through each employee in the model (the list of employees) *@
         @foreach (var item in Model)
         {
             <tr>
                 <td>
-                    @* Display the value of the property for the current employee *@
                     @Html.DisplayFor(modelItem => item.Name)
                 </td>
                 <td>
@@ -53,19 +52,25 @@
                     @Html.DisplayFor(modelItem => item.Designation)
                 </td>
                 <td>
-                    @* Display the Organization Name for the current employee *@
                     @Html.DisplayFor(modelItem => item.Organization.OrganizationName)
                 </td>
                 <td>
-                    @* Action links for each employee *@
-                    @* asp-action specifies the controller action *@
-                    @* asp-route-id passes the EmployeeId as a route parameter *@
-                    <a asp-action="Edit" asp-route-id="@item.EmployeeId">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.EmployeeId">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.EmployeeId">Delete</a> @* Include Delete link if you have the Delete action/view *@
+                    @* Apply Bootstrap button classes to links *@
+                    <a asp-action="Edit" asp-route-id="@item.EmployeeId" class="btn btn-sm btn-info">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.EmployeeId" class="btn btn-sm btn-secondary">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.EmployeeId" class="btn btn-sm btn-danger">Delete</a>
                 </td>
             </tr>
         }
     </tbody>
 </table>
+
+@* Display error message with Bootstrap alert classes *@
+@if (ViewBag.ErrorMessage != null)
+{
+    <div class="alert alert-danger mt-3">
+        @ViewBag.ErrorMessage
+    </div>
+}
+
 

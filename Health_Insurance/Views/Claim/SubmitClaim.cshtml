@@ -5,50 +5,56 @@
     ViewData["Title"] = "Submit Claim";
 }
 
-<h1>Submit New Claim</h1>
+<h1 class="mb-4">Submit New Claim</h1>
 
 <h4>Claim</h4>
 <hr />
+@* Use Bootstrap row and column for layout *@
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-6">
+        @* Use a column to limit the form width *@
         @* Form for submitting a new claim. Posts data to the SubmitClaim action. *@
         <form asp-action="SubmitClaim">
             @* Hidden field for CSRF protection *@
             @Html.AntiForgeryToken()
 
-            @* Validation summary to display all model errors *@
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            @* Validation summary with Bootstrap text-danger class *@
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div> @* Added margin-bottom *@
 
-            @* Dropdown for selecting Enrollment *@
+            @* Dropdown for selecting Enrollment with Bootstrap form-group and form-control *@
             @* Requires ViewBag.EnrollmentList populated in the controller *@
-            <div class="form-group">
-                <label asp-for="EnrollmentId" class="control-label"></label>
+            <div class="form-group mb-3">
+                @* Added margin-bottom *@
+                <label asp-for="EnrollmentId" class="form-label"></label> @* Use form-label for Bootstrap styling *@
                 @* The asp-items tag helper populates the dropdown using the SelectList from ViewBag *@
                 <select asp-for="EnrollmentId" class="form-control" asp-items="ViewBag.EnrollmentList">
                     <option value="">-- Select Enrollment --</option> @* Optional: Add a default empty option *@
                 </select>
-                @* Displays validation errors for EnrollmentId *@
+                @* Displays validation errors for EnrollmentId with Bootstrap text-danger *@
                 <span asp-validation-for="EnrollmentId" class="text-danger"></span>
             </div>
 
-            @* Input field for Claim Amount *@
-            <div class="form-group">
-                <label asp-for="ClaimAmount" class="control-label"></label>
+            @* Input field for Claim Amount with Bootstrap form-group and form-control *@
+            <div class="form-group mb-3">
+                @* Added margin-bottom *@
+                <label asp-for="ClaimAmount" class="form-label"></label> @* Use form-label for Bootstrap styling *@
                 <input asp-for="ClaimAmount" class="form-control" />
                 <span asp-validation-for="ClaimAmount" class="text-danger"></span>
             </div>
 
-            @* Input field for Claim Reason *@
-            <div class="form-group">
-                <label asp-for="ClaimReason" class="control-label"></label>
+            @* Input field for Claim Reason with Bootstrap form-group and form-control *@
+            <div class="form-group mb-3">
+                @* Added margin-bottom *@
+                <label asp-for="ClaimReason" class="form-label"></label> @* Use form-label for Bootstrap styling *@
                 @* Using textarea for potentially longer reasons *@
                 <textarea asp-for="ClaimReason" class="form-control"></textarea>
                 <span asp-validation-for="ClaimReason" class="text-danger"></span>
             </div>
 
-            @* Input field for Claim Date *@
-            <div class="form-group">
-                <label asp-for="ClaimDate" class="control-label"></label>
+            @* Input field for Claim Date with Bootstrap form-group and form-control *@
+            <div class="form-group mb-3">
+                @* Added margin-bottom *@
+                <label asp-for="ClaimDate" class="form-label"></label> @* Use form-label for Bootstrap styling *@
                 @* Using type="date" for a date picker in modern browsers *@
                 <input asp-for="ClaimDate" class="form-control" type="date" />
                 <span asp-validation-for="ClaimDate" class="text-danger"></span>
@@ -61,13 +67,14 @@
 
             <div class="form-group mt-3">
                 @* Added margin-top to button *@
-                <input type="submit" value="Submit Claim" class="btn btn-primary" />
+                <input type="submit" value="Submit Claim" class="btn btn-primary" /> @* Use Bootstrap button class *@
             </div>
         </form>
     </div>
 </div>
 
-<div>
+<div class="mt-3">
+    @* Added margin-top *@
     @* Link back to the list of all claims *@
     <a asp-action="ListAllClaims">Back to List</a>
 </div>
@@ -77,4 +84,5 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 }
+
 

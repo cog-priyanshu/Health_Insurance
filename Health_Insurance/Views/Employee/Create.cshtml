@@ -5,52 +5,59 @@
     ViewData["Title"] = "Create Employee";
 }
 
-<h1>Create Employee</h1>
+<h1 class="mb-4">Create Employee</h1>
 
 <h4>Employee</h4>
 <hr />
+@* Use Bootstrap row and column for layout *@
 <div class="row">
-    <div class="col-md-4">
-        @* Form for creating a new employee. Posts data to the Create action of the Employee controller. *@
-        @* asp-action="Create" targets the Create action *@
-        @* asp-controller="Employee" explicitly targets the Employee controller (optional if within Employee controller, but good practice) *@
+    <div class="col-md-6">
+        @* Use a column to limit the form width *@
+        @* Form for creating a new employee. Posts data to the Create action. *@
         <form asp-action="Create" asp-controller="Employee" method="post">
             @* This adds a hidden field for security (CSRF prevention) *@
             @Html.AntiForgeryToken() @* Ensure this is present for [ValidateAntiForgeryToken] *@
 
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            @* Validation summary with Bootstrap text-danger class *@
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div> @* Added margin-bottom *@
 
-            @* Input fields for other properties *@
-            <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
+            @* Input fields for each property of the Employee model with Bootstrap form-group and form-control *@
+            <div class="form-group mb-3">
+                @* Added margin-bottom *@
+                <label asp-for="Name" class="form-label"></label> @* Use form-label for Bootstrap styling *@
                 <input asp-for="Name" class="form-control" />
-                @* Displays validation errors for the Name field *@
+                @* Displays validation errors for the Name field with Bootstrap text-danger *@
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Email" class="control-label"></label>
+            <div class="form-group mb-3">
+                @* Added margin-bottom *@
+                <label asp-for="Email" class="form-label"></label> @* Use form-label for Bootstrap styling *@
                 <input asp-for="Email" class="form-control" />
                 <span asp-validation-for="Email" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Phone" class="control-label"></label>
+            <div class="form-group mb-3">
+                @* Added margin-bottom *@
+                <label asp-for="Phone" class="form-label"></label> @* Use form-label for Bootstrap styling *@
                 <input asp-for="Phone" class="form-control" />
                 <span asp-validation-for="Phone" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Address" class="control-label"></label>
+            <div class="form-group mb-3">
+                @* Added margin-bottom *@
+                <label asp-for="Address" class="form-label"></label> @* Use form-label for Bootstrap styling *@
                 <input asp-for="Address" class="form-control" />
                 <span asp-validation-for="Address" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Designation" class="control-label"></label>
+            <div class="form-group mb-3">
+                @* Added margin-bottom *@
+                <label asp-for="Designation" class="form-label"></label> @* Use form-label for Bootstrap styling *@
                 <input asp-for="Designation" class="form-control" />
                 <span asp-validation-for="Designation" class="text-danger"></span>
             </div>
 
-            @* Dropdown for selecting Organization *@
-            <div class="form-group">
-                <label asp-for="OrganizationId" class="control-label"></label>
+            @* Dropdown for selecting Organization with Bootstrap form-group and form-control *@
+            <div class="form-group mb-3">
+                @* Added margin-bottom *@
+                <label asp-for="OrganizationId" class="form-label"></label> @* Use form-label for Bootstrap styling *@
                 @* The asp-items tag helper populates the dropdown using the SelectList from ViewBag *@
                 @* ViewBag.OrganizationId accesses ViewData["OrganizationId"] *@
                 <select asp-for="OrganizationId" class="form-control" asp-items="ViewBag.OrganizationId">
@@ -59,14 +66,16 @@
                 <span asp-validation-for="OrganizationId" class="text-danger"></span>
             </div>
 
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+            <div class="form-group mt-3">
+                @* Added margin-top to button *@
+                <input type="submit" value="Create" class="btn btn-primary" /> @* Use Bootstrap button class *@
             </div>
         </form>
     </div>
 </div>
 
-<div>
+<div class="mt-3">
+    @* Added margin-top *@
     @* Link back to the Employee Index page *@
     <a asp-action="Index">Back to List</a>
 </div>
@@ -76,4 +85,5 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 }
+
 

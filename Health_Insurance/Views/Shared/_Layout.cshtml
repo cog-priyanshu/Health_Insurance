@@ -18,7 +18,7 @@
     @* Ensure you have Bootstrap 5 CSS and JS included in your _Layout.cshtml *@
 
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm bg-info navbar-dark border-bottom box-shadow mb-3">
             <div class="container-fluid">
                 @* Application Brand/Name *@
                 @* Use asp-area, asp-controller, asp-action to link to your Home page or other main page *@
@@ -34,21 +34,21 @@
                         @* Link to Employee Page *@
                         <li class="nav-item">
                             @* Use asp-controller and asp-action for MVC routing *@
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Employee" asp-action="Index">Employees</a>
+                            <a class="nav-link text-light" asp-area="" asp-controller="Employee" asp-action="Index">Employees</a>
                         </li>
                         @* Link to Enrollment Page *@
                         <li class="nav-item">
                             @* Use asp-controller and asp-action for MVC routing *@
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Enrollment" asp-action="Index">Enrollments</a>
+                            <a class="nav-link text-light" asp-area="" asp-controller="Enrollment" asp-action="Index">Enrollments</a>
                         </li>
                         @* Link to Claims Page (Optional, based on your module) *@
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Claim" asp-action="ListAllClaims">Claims</a>
-                        </li>
+                        @* <li class="nav-item"> *@
+                        @*     <a class="nav-link text-light" asp-area="" asp-controller="Claim" asp-action="ListAllClaims">Claims</a> *@
+                        @* </li> *@
                         @* Link to Premium Calculator Page (Optional, based on your module) *@
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="PremiumCalculator" asp-action="CalculatePremium">Premium Calculator</a>
-                        </li>
+                        @* <li class="nav-item"> *@
+                        @*     <a class="nav-link text-light" asp-area="" asp-controller="PremiumCalculator" asp-action="CalculatePremium">Premium Calculator</a> *@
+                        @* </li> *@
                         @* Add other navigation links here *@
                     </ul>
                 </div>
@@ -63,7 +63,7 @@
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
+    <footer class="border-top footer text-muted bg-black">
         <div class="container">
             &copy; 2025 - Health_Insurance - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
@@ -74,3 +74,7 @@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+
+
+
+
