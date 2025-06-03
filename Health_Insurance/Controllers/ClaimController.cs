@@ -63,11 +63,12 @@ namespace Health_Insurance.Controllers // Ensure this namespace is correct for y
         // Action to handle the submission of the new claim form
         [HttpPost]
         [ValidateAntiForgeryToken] // Prevents CSRF attacks
-        // Removed "ClaimStatus" from Bind attribute as it's not submitted by the form
+        // The [Bind] attribute explicitly lists the properties allowed to be bound from the form.
+        // ClaimStatus and Enrollment are intentionally excluded as they are not directly submitted by the form.
         public async Task<IActionResult> SubmitClaim([Bind("EnrollmentId,ClaimAmount,ClaimReason,ClaimDate")] Claim claim)
         {
-            // Model binding will populate the claim object from the form
-            // ClaimStatus is NOT bound from the form, it will be set by the service/controller
+            // ModelState.IsValid will be true ONLY if all [Required] fields included in [Bind] are provided
+            // and other validation rules (like DataType, StringLength) for those bound fields are met.
             if (ModelState.IsValid)
             {
                 // Use the Claim Service to submit the claim
@@ -82,7 +83,7 @@ namespace Health_Insurance.Controllers // Ensure this namespace is correct for y
                 }
                 else
                 {
-                    // Handle submission failure (e.g., invalid enrollment ID)
+                    // Handle submission failure (e.g., invalid enrollment ID, service logic failure)
                     ViewBag.ErrorMessage = "Claim submission failed. Please check the Enrollment ID.";
                     // Repopulate dropdowns if needed and return the view with submitted data
                     var enrollments = await _context.Enrollments.Include(e => e.Employee).Include(e => e.Policy).ToListAsync();
@@ -94,8 +95,9 @@ namespace Health_Insurance.Controllers // Ensure this namespace is correct for y
                     return View(claim); // Return the view with errors
                 }
             }
-            // If model state is not valid, return the view with submitted data to show validation errors
-            // Repopulate dropdowns if needed
+            // If model state is not valid (due to missing required fields or invalid data types for bound fields),
+            // return the view with submitted data to show validation errors.
+            // Repopulate dropdowns so the user doesn't lose their selection context.
             var enrollmentsInvalid = await _context.Enrollments.Include(e => e.Employee).Include(e => e.Policy).ToListAsync();
             ViewBag.EnrollmentList = new SelectList(enrollmentsInvalid.Select(e => new {
                 EnrollmentId = e.EnrollmentId,
@@ -157,7 +159,7 @@ namespace Health_Insurance.Controllers // Ensure this namespace is correct for y
         // Action to handle the submission of the status update form
         [HttpPost]
         [ValidateAntiForgeryToken] // Prevents CSRF attacks
-        public async Task<IActionResult> UpdateClaimStatus(int id, [Bind("ClaimId,ClaimStatus")] Claim claim) // Bind only necessary fields
+        public async Task<IActionResult> UpdateClaimStatus(int id, [Bind("ClaimId,ClaimStatus,ClaimReason")] Claim claim) // Bind only necessary fields
         {
             // Check if the id in the URL matches the id in the submitted form data
             if (id != claim.ClaimId)
@@ -168,23 +170,38 @@ namespace Health_Insurance.Controllers // Ensure this namespace is correct for y
             // Basic validation on the submitted model (only ClaimId and ClaimStatus are bound)
             if (ModelState.IsValid)
             {
-                // Use the Claim Service to update the status
-                var success = await _claimService.UpdateClaimStatusAsync(claim.ClaimId, claim.ClaimStatus);
+                try
+                {
+                    // Use the Claim Service to update the status
+                    var success = await _claimService.UpdateClaimStatusAsync(claim.ClaimId, claim.ClaimStatus);
 
-                if (success)
-                {
-                    // Redirect to the claim details page or list of claims
-                    return RedirectToAction(nameof(GetClaimDetails), new { id = claim.ClaimId }); // Redirect to details
-                    // Or RedirectToAction(nameof(ListAllClaims));
+                    if (success)
+                    {
+                        // Redirect to the claim details page or list of claims
+                        return RedirectToAction(nameof(GetClaimDetails), new { id = claim.ClaimId }); // Redirect to details
+                        // Or RedirectToAction(nameof(ListAllClaims));
+                    }
+                    else
+                    {
+                        // Handle update failure (e.g., claim not found, invalid status)
+                        ViewBag.ErrorMessage = "Failed to update claim status. Please check the Claim ID or status.";
+                        // Repopulate dropdowns and return the view
+                        var statuses = new List<string> { "SUBMITTED", "APPROVED", "REJECTED" };
+                        ViewBag.Statuses = new SelectList(statuses, claim.ClaimStatus); // Use the overload that takes the selected value
+                        return View(claim); // Return the view with errors
+                    }
                 }
-                else
+                catch (DbUpdateConcurrencyException)
                 {
-                    // Handle update failure (e.g., claim not found, invalid status)
-                    ViewBag.ErrorMessage = "Failed to update claim status. Please check the Claim ID or status.";
-                    // Repopulate dropdowns and return the view
-                    var statuses = new List<string> { "SUBMITTED", "APPROVED", "REJECTED" };
-                    ViewBag.Statuses = new SelectList(statuses, claim.ClaimStatus); // Use the overload that takes the selected value
-                    return View(claim); // Return the view with errors
+                    // Handle concurrency conflicts (e.g., another user updated the same record)
+                    if (!ClaimExists(claim.ClaimId)) // Use ClaimExists instead of EmployeeExists
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw; // Re-throw the exception if it's not a "not found" issue
+                    }
                 }
             }
             // If model state is not valid, return the view with submitted data
@@ -192,6 +209,12 @@ namespace Health_Insurance.Controllers // Ensure this namespace is correct for y
             var statusesInvalid = new List<string> { "SUBMITTED", "APPROVED", "REJECTED" };
             ViewBag.Statuses = new SelectList(statusesInvalid, claim.ClaimStatus); // Use the overload that takes the selected value
             return View(claim);
+        }
+
+        // Helper method to check if a claim exists (Corrected from EmployeeExists)
+        private bool ClaimExists(int id)
+        {
+            return _context.Claims.Any(e => e.ClaimId == id);
         }
 
         // You would add other actions as needed for claims management workflow

@@ -14,12 +14,15 @@ namespace Health_Insurance.Controllers // Ensure this namespace is correct
     {
         // Inject the Enrollment Service interface
         private readonly IEnrollmentService _enrollmentService;
+        // Inject the Premium Calculator Service interface
+        private readonly IPremiumCalculatorService _premiumCalculatorService; // Inject the premium calculator service
         private readonly ApplicationDbContext _context; // Inject DbContext to get Employees for dropdown
 
-        // Constructor: Inject the Enrollment Service and DbContext
-        public EnrollmentController(IEnrollmentService enrollmentService, ApplicationDbContext context)
+        // Constructor: Inject the Enrollment Service, Premium Calculator Service, and DbContext
+        public EnrollmentController(IEnrollmentService enrollmentService, IPremiumCalculatorService premiumCalculatorService, ApplicationDbContext context)
         {
             _enrollmentService = enrollmentService;
+            _premiumCalculatorService = premiumCalculatorService; // Assign injected premium calculator service
             _context = context; // Assign injected DbContext
         }
 
@@ -59,11 +62,11 @@ namespace Health_Insurance.Controllers // Ensure this namespace is correct
             }
             else
             {
-                // Handle enrollment failure (e.g., already enrolled, policy/employee not found)
+                // Handle failure (e.g., already enrolled, policy/employee not found)
                 // You could redirect to an error page or back to the policy list with an error message
                 ViewBag.ErrorMessage = "Enrollment failed. Please check if you are already enrolled or if the policy/employee exists.";
                 // Redirect back to the policy list
-                return RedirectToAction("Index"); // Or RedirectToAction("Details", "Employee", new { id = employeeId })
+                return RedirectToAction(nameof(Index)); // Or RedirectToAction("Details", "Employee", new { id = employeeId })
             }
         }
 
@@ -103,6 +106,17 @@ namespace Health_Insurance.Controllers // Ensure this namespace is correct
                 // Redirect back to the employee's enrolled policies page
                 return RedirectToAction("EnrolledPolicies", new { employeeId = employeeId }); // Stay on the same page with an error
             }
+        }
+
+        // POST: /Enrollment/CalculatePremium - Action to calculate premium via AJAX
+        [HttpPost] // This action will be called via a POST AJAX request
+        public async Task<IActionResult> CalculatePremium(int employeeId, int policyId)
+        {
+            // Use the Premium Calculator Service to get the calculated premium
+            var calculatedPremium = await _premiumCalculatorService.CalculatePremiumAsync(employeeId, policyId);
+
+            // Return the calculated premium as a JSON object
+            return Json(new { premium = calculatedPremium });
         }
 
         // You will add other actions as needed, e.g., for enrollment confirmation form (GET/POST)

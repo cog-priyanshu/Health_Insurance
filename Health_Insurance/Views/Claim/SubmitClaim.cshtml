@@ -14,7 +14,8 @@
     <div class="col-md-6">
         @* Use a column to limit the form width *@
         @* Form for submitting a new claim. Posts data to the SubmitClaim action. *@
-        <form asp-action="SubmitClaim">
+        <form asp-action="SubmitClaim" id="claimSubmitForm">
+            @* Added an ID to the form *@
             @* Hidden field for CSRF protection *@
             @Html.AntiForgeryToken()
 
@@ -60,11 +61,6 @@
                 <span asp-validation-for="ClaimDate" class="text-danger"></span>
             </div>
 
-            @* Claim Status is usually set by the system, not user input on submission form *@
-            @* You might add a hidden field if you need to pass a default status *@
-            @* <input type="hidden" asp-for="ClaimStatus" value="SUBMITTED" /> *@
-
-
             <div class="form-group mt-3">
                 @* Added margin-top to button *@
                 <input type="submit" value="Submit Claim" class="btn btn-primary" /> @* Use Bootstrap button class *@
@@ -83,6 +79,48 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script>
+        $(document).ready(function () {
+            // Client-side validation for the EnrollmentId dropdown
+            $('#claimSubmitForm').submit(function (event) {
+                var enrollmentId = $('#EnrollmentId').val(); // Get the value from the dropdown
+
+                // If the selected value is empty (the placeholder option)
+                if (enrollmentId === "") {
+                    // Prevent the form from submitting
+                    event.preventDefault();
+
+                    // Display an error message next to the dropdown
+                    $('#EnrollmentId').addClass('is-invalid'); // Add Bootstrap's invalid class
+                    // Add a custom error message if asp-validation-for doesn't catch it immediately
+                    if ($('span[data-valmsg-for="EnrollmentId"]').length === 0) {
+                        $('<span class="text-danger">The Enrollment field is required.</span>').insertAfter('#EnrollmentId');
+                    } else {
+                        $('span[data-valmsg-for="EnrollmentId"]').text('The Enrollment field is required.').show();
+                    }
+
+                    // Optionally, scroll to the error
+                    $('html, body').animate({
+                        scrollTop: $('#EnrollmentId').offset().top - 50
+                    }, 500);
+                } else {
+                    // If a valid option is selected, remove any previous error styling
+                    $('#EnrollmentId').removeClass('is-invalid');
+                    $('span[data-valmsg-for="EnrollmentId"]').text('').hide();
+                }
+            });
+
+            // Remove validation styling when a valid option is chosen
+            $('#EnrollmentId').on('change', function() {
+                if ($(this).val() !== "") {
+                    $(this).removeClass('is-invalid');
+                    $('span[data-valmsg-for="EnrollmentId"]').text('').hide();
+                }
+            });
+        });
+    </script>
 }
+
 
 

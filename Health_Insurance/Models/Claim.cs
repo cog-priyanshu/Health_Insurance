@@ -14,13 +14,13 @@ namespace Health_Insurance.Models // Ensure this namespace is correct based on y
 
         // Foreign Key to the Enrollment table
         // A Claim is associated with a specific Enrollment
-        [Required] // EnrollmentId should be required for a claim
+        [Required(ErrorMessage = "The Enrollment field is required.")] // EnrollmentId should be required for a claim
         public int EnrollmentId { get; set; }
 
         // Navigation property to the related Enrollment
         [ForeignKey("EnrollmentId")] // Specifies the foreign key property
         [BindNever] // Add this attribute to prevent model binding for this property
-        public virtual Enrollment Enrollment { get; set; }
+        public virtual Enrollment? Enrollment { get; set; } // This property is not bound from the form
 
         [Required]
         [Column(TypeName = "decimal(10, 2)")] // Specify SQL Server data type for precision
@@ -35,10 +35,11 @@ namespace Health_Insurance.Models // Ensure this namespace is correct based on y
         public DateTime ClaimDate { get; set; }
 
         // Status of the claim as described in the document
-        // Removed [Required] attribute here as the status is set by the system on submission.
+        // This property is NOT marked [Required] and is NOT included in the [Bind] attribute for submission.
+        // Its value will be set by the service/controller.
         [StringLength(20)]
-        // Validation for allowed status values ("SUBMITTED", "APPROVED", "REJECTED") should be handled in the service layer or controller.
-        public string ClaimStatus { get; set; } // e.g., "SUBMITTED", "APPROVED", "REJECTED"
+        
+        public string? ClaimStatus { get; set; } // e.g., "SUBMITTED", "APPROVED", "REJECTED"
     }
 }
 

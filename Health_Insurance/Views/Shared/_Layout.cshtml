@@ -9,6 +9,30 @@
     <link rel="stylesheet" href="~/Health_Insurance.styles.css" asp-append-version="true" />
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            /* Optional: Add a subtle background color or gradient to the body */
+            /* background-color: #f8f9fa; */
+            /* CSS for sticky footer */
+            /* display: flex; */
+            /* flex-direction: column; */
+            /* min-height: 100vh; /* Ensure body takes at least the full viewport height */ */
+        }
+        /* Optional: Add some padding to the main content area */
+        main {
+            padding-top: 20px;
+            padding-bottom: 20px;
+            flex-grow: 1; /* Allow main content to grow and push footer down */
+        }
+
+        /* Ensure footer does not shrink */
+        footer {
+            flex-shrink: 0;
+        }
+    </style>
 </head>
 <body>
     @* This is the HTML for the Navbar. You should place this in your Views/Shared/_Layout.cshtml file. *@
@@ -31,6 +55,10 @@
                 @* Navbar links container - collapses on smaller screens *@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
+                        @* ... other nav items ... *@
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Account" asp-action="Login">Login</a> @* Adjust text-light if needed based on your navbar color *@
+                        </li>
                         @* Link to Employee Page *@
                         <li class="nav-item">
                             @* Use asp-controller and asp-action for MVC routing *@
@@ -42,13 +70,13 @@
                             <a class="nav-link text-light" asp-area="" asp-controller="Enrollment" asp-action="Index">Enrollments</a>
                         </li>
                         @* Link to Claims Page (Optional, based on your module) *@
-                        @* <li class="nav-item"> *@
-                        @*     <a class="nav-link text-light" asp-area="" asp-controller="Claim" asp-action="ListAllClaims">Claims</a> *@
-                        @* </li> *@
+                        <li class="nav-item">
+                             <a class="nav-link text-light" asp-area="" asp-controller="Claim" asp-action="ListAllClaims">Claims</a>
+                        </li>
                         @* Link to Premium Calculator Page (Optional, based on your module) *@
-                        @* <li class="nav-item"> *@
-                        @*     <a class="nav-link text-light" asp-area="" asp-controller="PremiumCalculator" asp-action="CalculatePremium">Premium Calculator</a> *@
-                        @* </li> *@
+                        <li class="nav-item"> 
+                             <a class="nav-link text-light" asp-area="" asp-controller="PremiumCalculator" asp-action="CalculatePremium">Premium Calculator</a>
+                        </li>
                         @* Add other navigation links here *@
                     </ul>
                 </div>
@@ -63,7 +91,7 @@
         </main>
     </div>
 
-    <footer class="border-top footer text-muted bg-black">
+    <footer class="border-top footer text-muted bg-dark text-light py-2">
         <div class="container">
             &copy; 2025 - Health_Insurance - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
