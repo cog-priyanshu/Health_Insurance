@@ -1,7 +1,8 @@
+// Program.cs
 using Health_Insurance.Data;
-using Health_Insurance.Models; // Added if needed for any Program.cs logic, though less common
-using Health_Insurance.Services; // Ensure this using statement is present
+using Health_Insurance.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,14 +13,27 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Register the Enrollment Service for dependency injection (if not already there)
+// Register your custom UserService for dependency injection
+builder.Services.AddScoped<IUserService, UserService>();
+
+// Register other services (ensure these are already present)
 builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
-
-// Register the Premium Calculator Service for dependency injection (if not already there)
 builder.Services.AddScoped<IPremiumCalculatorService, PremiumCalculatorService>();
+builder.Services.AddScoped<IClaimService, ClaimService>();
 
-// Register the Claim Service for dependency injection
-builder.Services.AddScoped<IClaimService, ClaimService>(); // Add this line
+
+// --- Configure Authentication Services ---
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Account/Login"; // Specifies the path to the login page
+        options.LogoutPath = "/Account/Logout"; // Specifies the path to the logout action
+        options.AccessDeniedPath = "/Account/AccessDenied"; // Specifies the path for access denied
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(30); // Cookie expiration time
+        options.SlidingExpiration = true; // Renew cookie if half of expiration time has passed
+    });
+// --- End Configure Authentication Services ---
+
 
 var app = builder.Build();
 
@@ -36,11 +50,16 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+// --- Add Authentication and Authorization Middleware ---
+// These must be placed between UseRouting() and MapControllerRoute()
+app.UseAuthentication(); // Must be before UseAuthorization
 app.UseAuthorization();
+// --- End Authentication and Authorization Middleware ---
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    // Change the default controller and action to point to your Login page
+    pattern: "{controller=Account}/{action=Login}/{id?}"); // Changed default route
 
 app.Run();
 

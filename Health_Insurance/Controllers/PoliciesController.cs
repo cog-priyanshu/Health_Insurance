@@ -1,16 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
+﻿// Controllers/PoliciesController.cs
 using Health_Insurance.Data;
 using Health_Insurance.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization; // Add this using statement
 
 namespace Health_Insurance.Controllers
 {
-    public class PoliciesController : Controller
+    // Restrict all actions in this controller to users with the "Admin" role.
+    [Authorize(Roles = "Admin")]
+    public class PoliciesController : Controller // Corrected Controller Name
     {
         private readonly ApplicationDbContext _context;
 
@@ -50,8 +51,6 @@ namespace Health_Insurance.Controllers
         }
 
         // POST: Policies/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("PolicyId,PolicyName,CoverageAmount,PremiumAmount,PolicyType")] Policy policy)
@@ -82,8 +81,6 @@ namespace Health_Insurance.Controllers
         }
 
         // POST: Policies/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("PolicyId,PolicyName,CoverageAmount,PremiumAmount,PolicyType")] Policy policy)

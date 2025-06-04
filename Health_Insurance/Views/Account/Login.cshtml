@@ -1,5 +1,4 @@
-﻿@* This is the Razor View for the Login page. *@
-@* It uses the layout file for common structure and includes. *@
+﻿@model Health_Insurance.Models.LoginViewModel
 
 @{
     ViewData["Title"] = "Login"; // Set the page title
@@ -31,24 +30,20 @@
         width: 100%;
         max-width: 450px; /* Max width for the login card */
     }
-
-        .login-container h2 {
-            margin-bottom: 30px;
-            text-align: center;
-            color: #333;
-        }
-
+    .login-container h2 {
+        margin-bottom: 30px;
+        text-align: center;
+        color: #333;
+    }
     .form-control {
         border-radius: 8px; /* Rounded form inputs */
     }
-
     .btn-login {
         border-radius: 8px; /* Rounded buttons */
         padding: 10px 20px;
         font-size: 1.1rem;
         width: 100%; /* Full width button */
     }
-
     .nav-tabs .nav-link {
         color: #495057; /* Default tab text color */
         border: none;
@@ -57,13 +52,11 @@
         border-top-left-radius: 8px;
         border-top-right-radius: 8px;
     }
-
-        .nav-tabs .nav-link.active {
-            color: #007bff; /* Active tab text color (Bootstrap primary blue) */
-            border-bottom-color: #007bff; /* Active tab underline color */
-            font-weight: 600;
-        }
-
+    .nav-tabs .nav-link.active {
+        color: #007bff; /* Active tab text color (Bootstrap primary blue) */
+        border-bottom-color: #007bff; /* Active tab underline color */
+        font-weight: 600;
+    }
     .tab-content {
         padding-top: 20px;
     }
@@ -78,6 +71,7 @@
         @* Validation Summary to display login errors from the controller *@
         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
+        <!-- Tabs for Admin and Employee Login -->
         <ul class="nav nav-tabs" id="loginTabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="admin-tab" data-bs-toggle="tab" data-bs-target="#adminLogin" type="button" role="tab" aria-controls="adminLogin" aria-selected="true">Admin Login</button>
@@ -87,41 +81,48 @@
             </li>
         </ul>
 
+        <!-- Tab Content -->
         <div class="tab-content" id="loginTabsContent">
+            <!-- Admin Login Form -->
             <div class="tab-pane fade show active" id="adminLogin" role="tabpanel" aria-labelledby="admin-tab">
                 @* Use asp-action and asp-controller to target the POST Login action *@
                 <form asp-action="Login" asp-controller="Account" method="post">
-                    @* Include the Anti-Forgery Token *@
-                    @Html.AntiForgeryToken()
+                     @* Include the Anti-Forgery Token *@
+                     @Html.AntiForgeryToken()
                     <div class="mb-3">
-                        <label for="adminUsername" class="form-label">Username</label>
-                        @* Use name attribute to match parameter name in controller action *@
-                        <input type="text" class="form-control" id="adminUsername" name="adminUsername" placeholder="Enter Admin Username">
+                        <label asp-for="Username" class="form-label"></label> @* Use asp-for for Username *@
+                        <input asp-for="Username" class="form-control" placeholder="Enter Admin Username"> @* Use asp-for for Username *@
+                        <span asp-validation-for="Username" class="text-danger"></span>
                     </div>
                     <div class="mb-3">
-                        <label for="adminPassword" class="form-label">Password</label>
-                        @* Use name attribute to match parameter name in controller action *@
-                        <input type="password" class="form-control" id="adminPassword" name="adminPassword" placeholder="Enter Admin Password">
+                        <label asp-for="Password" class="form-label"></label> @* Use asp-for for Password *@
+                        <input asp-for="Password" type="password" class="form-control" placeholder="Enter Admin Password"> @* Use asp-for for Password, type="password" *@
+                        <span asp-validation-for="Password" class="text-danger"></span>
                     </div>
+                    @* Hidden field to specify login type for Admin *@
+                    <input type="hidden" asp-for="LoginType" value="Admin" />
                     <button type="submit" class="btn btn-primary btn-login">Login as Admin</button>
                 </form>
             </div>
 
+            <!-- Employee Login Form -->
             <div class="tab-pane fade" id="employeeLogin" role="tabpanel" aria-labelledby="employee-tab">
-                @* Use asp-action and asp-controller to target the POST Login action *@
-                <form asp-action="Login" asp-controller="Account" method="post">
-                    @* Include the Anti-Forgery Token *@
-                    @Html.AntiForgeryToken()
+                 @* Use asp-action and asp-controller to target the POST Login action *@
+                 <form asp-action="Login" asp-controller="Account" method="post">
+                     @* Include the Anti-Forgery Token *@
+                     @Html.AntiForgeryToken()
                     <div class="mb-3">
-                        <label for="employeeEmail" class="form-label">Email Address</label>
-                        @* Use name attribute to match parameter name in controller action *@
-                        <input type="email" class="form-control" id="employeeEmail" name="employeeEmail" placeholder="Enter Employee Email">
+                        <label asp-for="Username" class="form-label"></label> @* Use asp-for for Username *@
+                        <input asp-for="Username" class="form-control" placeholder="Enter Employee Username"> @* Use asp-for for Username *@
+                        <span asp-validation-for="Username" class="text-danger"></span>
                     </div>
                     <div class="mb-3">
-                        <label for="employeePassword" class="form-label">Password</label>
-                        @* Use name attribute to match parameter name in controller action *@
-                        <input type="password" class="form-control" id="employeePassword" name="employeePassword" placeholder="Enter Employee Password">
+                        <label asp-for="Password" class="form-label"></label> @* Use asp-for for Password *@
+                        <input asp-for="Password" type="password" class="form-control" placeholder="Enter Employee Password"> @* Use asp-for for Password, type="password" *@
+                        <span asp-validation-for="Password" class="text-danger"></span>
                     </div>
+                    @* Hidden field to specify login type for Employee *@
+                    <input type="hidden" asp-for="LoginType" value="Employee" />
                     <button type="submit" class="btn btn-success btn-login">Login as Employee</button>
                 </form>
             </div>
@@ -134,16 +135,17 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 
     <script>
         $(document).ready(function() {
             // Any custom jQuery for this page would go here.
-            // The Bootstrap tab functionality is handled by bootstrap.bundle.min.js loaded here.
+            // The Bootstrap tab functionality is handled by bootstrap.bundle.min.js loaded in _Layout.cshtml.
         });
     </script>
 }
+
+
+
 
 

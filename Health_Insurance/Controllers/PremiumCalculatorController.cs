@@ -1,52 +1,78 @@
 ﻿// Controllers/PremiumCalculatorController.cs
-using Health_Insurance.Services; // Ensure namespace is correct for your Services
+using Health_Insurance.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization; // Add this using statement
+using System.Security.Claims; // Needed for User.FindFirst
+using Health_Insurance.Data; // Needed to fetch Employees for dropdown
+using Microsoft.EntityFrameworkCore; // Needed for ToListAsync()
+using Microsoft.AspNetCore.Mvc.Rendering; // Needed for SelectList
 
-namespace Health_Insurance.Controllers // Ensure this namespace is correct for your Controllers folder
+namespace Health_Insurance.Controllers
 {
-    // Controller to handle requests related to Premium Calculation
+    // All actions in this controller require authentication.
+    [Authorize]
     public class PremiumCalculatorController : Controller
     {
-        // Inject the Premium Calculator Service interface
         private readonly IPremiumCalculatorService _premiumCalculatorService;
+        private readonly ApplicationDbContext _context; // Inject DbContext to get Employees for dropdown
 
-        // Constructor: Inject the Premium Calculator Service
-        public PremiumCalculatorController(IPremiumCalculatorService premiumCalculatorService)
+        public PremiumCalculatorController(IPremiumCalculatorService premiumCalculatorService, ApplicationDbContext context)
         {
             _premiumCalculatorService = premiumCalculatorService;
+            _context = context;
         }
 
         // GET: /PremiumCalculator/CalculatePremium
-        // This action could display a form for premium calculation input
-        public IActionResult CalculatePremium()
+        public async Task<IActionResult> CalculatePremium()
         {
-            // This view could contain input fields for Employee ID and Policy ID
-            // or other criteria needed for calculation.
+            if (User.IsInRole("Employee"))
+            {
+                var loggedInEmployeeId = User.FindFirst("EmployeeId")?.Value;
+                if (loggedInEmployeeId != null && int.TryParse(loggedInEmployeeId, out int employeeId))
+                {
+                    // If an employee is logged in, pre-select their ID and disable the dropdown
+                    ViewBag.EmployeeList = new SelectList(new List<Health_Insurance.Models.Employee> { await _context.Employees.FindAsync(employeeId) }, "EmployeeId", "Name", employeeId);
+                    ViewBag.IsEmployee = true; // Flag for the view to disable dropdown
+                }
+                else
+                {
+                    // Fallback if employee ID not found in claims, though it should be
+                    ViewBag.EmployeeList = new SelectList(new List<Health_Insurance.Models.Employee>());
+                    ViewBag.IsEmployee = true;
+                }
+            }
+            else // Admin or other roles
+            {
+                var employees = await _context.Employees.ToListAsync();
+                ViewBag.EmployeeList = new SelectList(employees, "EmployeeId", "Name");
+                ViewBag.IsEmployee = false;
+            }
+
+            // Fetch all policies to populate the dropdown
+            ViewBag.PolicyList = new SelectList(await _context.Policies.ToListAsync(), "PolicyId", "PolicyName");
+
             return View();
         }
 
         // POST: /PremiumCalculator/CalculatePremium
-        // This action handles the premium calculation request, likely via AJAX or a form submission.
         [HttpPost]
-        // You might want to add [ValidateAntiForgeryToken] if this is a form post
-        // [ValidateAntiForgeryToken]
+        // [ValidateAntiForgeryToken] // Uncomment if you add AntiForgeryToken to the AJAX form
         public async Task<IActionResult> CalculatePremium(int employeeId, int policyId)
         {
-            // Use the injected Premium Calculator Service to perform the calculation
+            // Enforce that an Employee can only calculate premium for their own ID
+            if (User.IsInRole("Employee"))
+            {
+                var loggedInEmployeeId = User.FindFirst("EmployeeId")?.Value;
+                if (loggedInEmployeeId == null || !int.TryParse(loggedInEmployeeId, out int actualEmployeeId) || actualEmployeeId != employeeId)
+                {
+                    return Forbid(); // Attempt by an Employee to calculate for someone else
+                }
+            }
+
             var calculatedPremium = await _premiumCalculatorService.CalculatePremiumAsync(employeeId, policyId);
-
-            // Return the calculated premium.
-            // If this is an AJAX call, return as JSON.
-            // If this is a form post, you might pass the result to a confirmation view.
-
-            // For now, let's assume it's designed to be called via AJAX and return JSON.
-            // If you need a form-based approach, we can adjust this.
             return Json(new { premium = calculatedPremium });
         }
-
-        // You might add other actions here as needed for premium calculation features
-        // e.g., GetCalculationForm, DisplayCalculationResult
     }
 }
 

@@ -1,9 +1,9 @@
 ﻿// Models/Employee.cs
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Health_Insurance.Models;
+using Microsoft.AspNetCore.Mvc.ModelBinding; // Needed for [BindNever]
 
-namespace Health_Insurance.Models // Note: This namespace might need to be updated to match your project name (e.g., Health_Insurance.Models)
+namespace Health_Insurance.Models // Ensure this namespace is correct based on your project name
 {
     // Represents an Employee entity, mapping to the Employee table in the database.
     public class Employee
@@ -32,8 +32,18 @@ namespace Health_Insurance.Models // Note: This namespace might need to be updat
 
         // Navigation property to the related Organization
         [ForeignKey("OrganizationId")] // Specifies the foreign key property
+        [BindNever] // Add this attribute to prevent model binding for this property
+        public virtual Organization Organization { get; set; }
 
-        public virtual Organization? Organization { get; set; }
+        // --- Authentication Fields for Employee Login ---
+        [Required]
+        [StringLength(50)]
+        public string Username { get; set; }
+
+        [Required]
+        [StringLength(256)] // Store hashed passwords, so a longer length is needed
+        public string PasswordHash { get; set; }
+        // --- End Authentication Fields ---
 
         // Navigation property for Enrollments (if needed later)
         // public virtual ICollection<Enrollment> Enrollments { get; set; }

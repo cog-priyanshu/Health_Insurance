@@ -1,125 +1,150 @@
 ﻿// Controllers/EnrollmentController.cs
-using Health_Insurance.Data; // Ensure namespace is correct for your DbContext
-using Health_Insurance.Models; // Ensure namespace is correct for your Models
-using Health_Insurance.Services; // Ensure namespace is correct for your Services
+using Health_Insurance.Data;
+using Health_Insurance.Models;
+using Health_Insurance.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore; // Needed for .ToListAsync() on Employees
+using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc.Rendering; // Needed for SelectList
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Authorization; // Add this using statement
+using System.Security.Claims; // Needed for User.FindFirst
 
-namespace Health_Insurance.Controllers // Ensure this namespace is correct
+namespace Health_Insurance.Controllers
 {
-    // Controller to handle requests related to Policy Enrollments
+    // All actions in this controller require authentication.
+    [Authorize]
     public class EnrollmentController : Controller
     {
-        // Inject the Enrollment Service interface
         private readonly IEnrollmentService _enrollmentService;
-        // Inject the Premium Calculator Service interface
-        private readonly IPremiumCalculatorService _premiumCalculatorService; // Inject the premium calculator service
-        private readonly ApplicationDbContext _context; // Inject DbContext to get Employees for dropdown
+        private readonly IPremiumCalculatorService _premiumCalculatorService;
+        private readonly ApplicationDbContext _context;
 
-        // Constructor: Inject the Enrollment Service, Premium Calculator Service, and DbContext
         public EnrollmentController(IEnrollmentService enrollmentService, IPremiumCalculatorService premiumCalculatorService, ApplicationDbContext context)
         {
             _enrollmentService = enrollmentService;
-            _premiumCalculatorService = premiumCalculatorService; // Assign injected premium calculator service
-            _context = context; // Assign injected DbContext
+            _premiumCalculatorService = premiumCalculatorService;
+            _context = context;
         }
 
         // GET: /Enrollment/Index
-        // This action will list available policies for enrollment and allow employee selection.
+        // Accessible to all authenticated users (Admin and Employee)
         public async Task<IActionResult> Index()
         {
-            // Use the service to get all available policies
             var policies = await _enrollmentService.GetAllPoliciesAsync();
 
-            // Fetch all employees to populate the dropdown
+            // Fetch all employees to populate the dropdown for Admin to select
+            // For an Employee, this dropdown might be hidden or pre-selected.
             var employees = await _context.Employees.ToListAsync();
-
-            // Create a SelectList for the employee dropdown
-            // Value: EmployeeId, Text: Employee Name
             ViewBag.EmployeeList = new SelectList(employees, "EmployeeId", "Name");
 
-            // Pass the list of policies to the Index view
             return View(policies);
         }
 
         // GET: /Enrollment/Enroll?policyId=X&employeeId=Y
-        // This action handles the request to enroll an employee in a policy.
-        // employeeId is now passed dynamically from the view.
+        // Accessible to all authenticated users (Admin and Employee)
         public async Task<IActionResult> Enroll(int policyId, int employeeId)
         {
-            // In a real application, you'd get the employeeId from the logged-in user
-            // For now, we'll pass it as a route parameter or query string for testing.
+            // IMPORTANT: In a real application, you would verify that the 'employeeId'
+            // matches the logged-in user's EmployeeId if the user is an 'Employee'.
+            // An Admin can enroll any employee, but an Employee can only enroll themselves.
+            if (User.IsInRole("Employee"))
+            {
+                var loggedInEmployeeId = User.FindFirst("EmployeeId")?.Value;
+                if (loggedInEmployeeId == null || !int.TryParse(loggedInEmployeeId, out int actualEmployeeId) || actualEmployeeId != employeeId)
+                {
+                    // Attempt by an Employee to enroll someone else or an invalid employeeId
+                    return Forbid(); // Or RedirectToAction("AccessDenied", "Account");
+                }
+            }
 
-            // Use the service to perform the enrollment logic
             var success = await _enrollmentService.EnrollEmployeeInPolicyAsync(employeeId, policyId);
 
             if (success)
             {
-                // Redirect to the page showing the employee's enrolled policies
                 return RedirectToAction("EnrolledPolicies", new { employeeId = employeeId });
             }
             else
             {
-                // Handle failure (e.g., already enrolled, policy/employee not found)
-                // You could redirect to an error page or back to the policy list with an error message
                 ViewBag.ErrorMessage = "Enrollment failed. Please check if you are already enrolled or if the policy/employee exists.";
-                // Redirect back to the policy list
-                return RedirectToAction(nameof(Index)); // Or RedirectToAction("Details", "Employee", new { id = employeeId })
+                return RedirectToAction(nameof(Index));
             }
         }
 
-
         // GET: /Enrollment/EnrolledPolicies/5
-        // This action lists the policies a specific employee is enrolled in.
-        public async Task<IActionResult> EnrolledPolicies(int employeeId) // Need employee ID
+        // Accessible to all authenticated users.
+        // An Admin can view any employee's enrollments. An Employee can only view their own.
+        public async Task<IActionResult> EnrolledPolicies(int employeeId)
         {
-            // In a real application, you'd get the employeeId from the logged-in user
-            // For now, we'll pass it as a route parameter or query string for testing.
+            // Enforce that an Employee can only view their own enrollments
+            if (User.IsInRole("Employee"))
+            {
+                var loggedInEmployeeId = User.FindFirst("EmployeeId")?.Value;
+                if (loggedInEmployeeId == null || !int.TryParse(loggedInEmployeeId, out int actualEmployeeId) || actualEmployeeId != employeeId)
+                {
+                    // Attempt by an Employee to view someone else's enrollments
+                    return Forbid(); // Or RedirectToAction("AccessDenied", "Account");
+                }
+            }
 
             var enrollments = await _enrollmentService.GetEnrolledPoliciesByEmployeeIdAsync(employeeId);
 
-            // Fetch the employee's name to display on the page
             var employee = await _context.Employees.FindAsync(employeeId);
-            ViewBag.EmployeeName = employee?.Name ?? "Unknown Employee"; // Handle case where employee is not found
+            ViewBag.EmployeeName = employee?.Name ?? "Unknown Employee";
 
-            return View(enrollments); // Pass the list of enrollments to the EnrolledPolicies view
+            return View(enrollments);
         }
 
-        // POST: /Enrollment/CancelEnrollment/5 - Handle cancellation request
+        // POST: /Enrollment/CancelEnrollment/5
+        // Accessible to all authenticated users.
+        // An Admin can cancel any enrollment. An Employee can only cancel their own.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CancelEnrollment(int enrollmentId, int employeeId) // Need enrollment ID and employee ID to redirect back
+        public async Task<IActionResult> CancelEnrollment(int enrollmentId, int employeeId)
         {
+            // Enforce that an Employee can only cancel their own enrollments
+            if (User.IsInRole("Employee"))
+            {
+                var loggedInEmployeeId = User.FindFirst("EmployeeId")?.Value;
+                if (loggedInEmployeeId == null || !int.TryParse(loggedInEmployeeId, out int actualEmployeeId) || actualEmployeeId != employeeId)
+                {
+                    // Attempt by an Employee to cancel someone else's enrollment
+                    return Forbid(); // Or RedirectToAction("AccessDenied", "Account");
+                }
+            }
+
             var success = await _enrollmentService.CancelEnrollmentAsync(enrollmentId);
 
             if (success)
             {
-                // Redirect back to the employee's enrolled policies page
                 return RedirectToAction("EnrolledPolicies", new { employeeId = employeeId });
             }
             else
             {
-                // Handle failure (e.g., enrollment not found, cannot cancel)
                 ViewBag.ErrorMessage = "Cancellation failed. Enrollment not found or cannot be cancelled.";
-                // Redirect back to the employee's enrolled policies page
-                return RedirectToAction("EnrolledPolicies", new { employeeId = employeeId }); // Stay on the same page with an error
+                return RedirectToAction("EnrolledPolicies", new { employeeId = employeeId });
             }
         }
 
         // POST: /Enrollment/CalculatePremium - Action to calculate premium via AJAX
-        [HttpPost] // This action will be called via a POST AJAX request
+        // Accessible to all authenticated users
+        [HttpPost]
         public async Task<IActionResult> CalculatePremium(int employeeId, int policyId)
         {
-            // Use the Premium Calculator Service to get the calculated premium
-            var calculatedPremium = await _premiumCalculatorService.CalculatePremiumAsync(employeeId, policyId);
+            // In a real application, you might verify if the employeeId belongs to the logged-in user
+            // if the user is an 'Employee' and not an 'Admin'.
+            if (User.IsInRole("Employee"))
+            {
+                var loggedInEmployeeId = User.FindFirst("EmployeeId")?.Value;
+                if (loggedInEmployeeId == null || !int.TryParse(loggedInEmployeeId, out int actualEmployeeId) || actualEmployeeId != employeeId)
+                {
+                    // Attempt by an Employee to calculate premium for someone else
+                    return Forbid();
+                }
+            }
 
-            // Return the calculated premium as a JSON object
+            var calculatedPremium = await _premiumCalculatorService.CalculatePremiumAsync(employeeId, policyId);
             return Json(new { premium = calculatedPremium });
         }
-
-        // You will add other actions as needed, e.g., for enrollment confirmation form (GET/POST)
     }
 }
 

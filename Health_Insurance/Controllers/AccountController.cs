@@ -1,109 +1,148 @@
 ﻿// Controllers/AccountController.cs
+using Health_Insurance.Models; // Ensure this namespace is correct for LoginViewModel, Employee, Admin
+using Health_Insurance.Services; // Ensure this namespace is correct for IUserService
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks; // Needed for async methods
+using System.Threading.Tasks;
+using System.Security.Claims; // Needed for ClaimsIdentity, ClaimsPrincipal
+using Microsoft.AspNetCore.Authentication; // Needed for SignInAsync, SignOutAsync
+using Microsoft.AspNetCore.Authentication.Cookies; // Needed for CookieAuthenticationDefaults
+using System.Collections.Generic; // Needed for List<Claim>
 
-namespace Health_Insurance.Controllers // Ensure this namespace is correct based on your project name
+namespace Health_Insurance.Controllers // Ensure this namespace is correct
 {
-    // Controller to handle Account related actions like Login, Logout, etc.
+    // Controller to handle user authentication (login, logout, access denied)
     public class AccountController : Controller
     {
+        private readonly IUserService _userService; // Inject the UserService
+
+        // Constructor: Inject the UserService
+        public AccountController(IUserService userService)
+        {
+            _userService = userService;
+        }
+
         // GET: /Account/Login
-        // Action to display the login page
-        [HttpGet] // Specifies that this action handles GET requests
+        // Displays the login page.
         public IActionResult Login()
         {
-            // Return the Login view (Views/Account/Login.cshtml)
+            // If a user is already authenticated, redirect them to their respective dashboard
+            if (User.Identity.IsAuthenticated)
+            {
+                if (User.IsInRole("Admin"))
+                {
+                    return RedirectToAction("Index", "Employee"); // Admin goes to Employee management
+                }
+                else if (User.IsInRole("Employee"))
+                {
+                    // Get the EmployeeId from the claims to redirect to their specific enrolled policies
+                    var employeeIdClaim = User.FindFirst("EmployeeId");
+                    if (employeeIdClaim != null && int.TryParse(employeeIdClaim.Value, out int employeeId))
+                    {
+                        return RedirectToAction("EnrolledPolicies", "Enrollment", new { employeeId = employeeId });
+                    }
+                    // Fallback if employeeId claim is missing for some reason
+                    return RedirectToAction("Index", "Home");
+                }
+                // Fallback for authenticated users without specific roles
+                return RedirectToAction("Index", "Home");
+            }
             return View();
         }
 
         // POST: /Account/Login
-        // Action to handle the login form submission
-        [HttpPost] // Specifies that this action handles POST requests
-        [ValidateAntiForgeryToken] // Prevents Cross-Site Request Forgery attacks (important for forms)
-        public async Task<IActionResult> Login(string adminUsername, string adminPassword, string employeeEmail, string employeePassword)
+        // Handles the login form submission.
+        [HttpPost]
+        [ValidateAntiForgeryToken] // Protects against CSRF attacks
+        public async Task<IActionResult> Login(LoginViewModel model)
         {
-            // This is where your backend login logic would go.
-            // Based on the submitted data (adminUsername/adminPassword or employeeEmail/employeePassword),
-            // you would authenticate the user against your database or identity system.
-
-            // For this frontend-focused demonstration, we'll just simulate success/failure
-            // and redirect. You will replace this with actual authentication logic later.
-
-            bool loginSuccessful = false;
-            string userRole = null; // To determine where to redirect
-
-            // --- Simulated Backend Authentication Logic (Replace with real code) ---
-            if (!string.IsNullOrEmpty(adminUsername) && !string.IsNullOrEmpty(adminPassword))
+            // Check if the submitted model is valid based on data annotations
+            if (!ModelState.IsValid)
             {
-                // Simulate Admin login check
-                if (adminUsername == "admin" && adminPassword == "password") // Replace with actual admin credentials check
-                {
-                    loginSuccessful = true;
-                    userRole = "Admin";
-                    // In a real app, you'd sign in the user here using ASP.NET Core Identity or similar
-                    // await HttpContext.SignInAsync(...)
-                }
+                return View(model); // Return the view with validation errors
             }
-            else if (!string.IsNullOrEmpty(employeeEmail) && !string.IsNullOrEmpty(employeePassword))
+
+            // Authenticate user using the UserService, passing the LoginType
+            var user = await _userService.AuthenticateUserAsync(model.Username, model.Password, model.LoginType); // Pass model.LoginType here
+
+            if (user == null)
             {
-                // Simulate Employee login check
-                // You would query your database to find an employee with this email and password
-                // var employee = await _context.Employees.FirstOrDefaultAsync(e => e.Email == employeeEmail && e.Password == employeePassword); // Assuming Employee model has Password field
-                // if (employee != null)
-                // {
-                //     loginSuccessful = true;
-                //     userRole = "Employee";
-                //     // In a real app, you'd sign in the user here
-                //     // await HttpContext.SignInAsync(...)
-                // }
-
-                // For demo, just check a dummy employee
-                if (employeeEmail == "employee@example.com" && employeePassword == "password") // Replace with actual employee credentials check
-                {
-                    loginSuccessful = true;
-                    userRole = "Employee";
-                    // In a real app, you'd sign in the user here
-                    // await HttpContext.SignInAsync(...)
-                }
+                // Authentication failed (either credentials incorrect or user type mismatch)
+                ModelState.AddModelError(string.Empty, "Invalid username or password, or incorrect login type selected.");
+                return View(model); // Return the view with an error message
             }
-            // --- End Simulated Backend Authentication Logic ---
 
-
-            if (loginSuccessful)
+            // Determine user role and create claims
+            var claims = new List<System.Security.Claims.Claim>
             {
-                // Redirect based on role (replace with your actual dashboard/landing pages)
-                if (userRole == "Admin")
-                {
-                    return RedirectToAction("Index", "Employee"); // Redirect Admin to Employee list (example)
-                }
-                else if (userRole == "Employee")
-                {
-                    // Redirect Employee to their enrolled policies or a dashboard
-                    // You'll need to get the employeeId after successful login
-                    // For demo, redirect to a placeholder or their enrolled policies (if you can get the ID)
-                    // return RedirectToAction("EnrolledPolicies", "Enrollment", new { employeeId = /* get employee ID */ });
-                    return RedirectToAction("Index", "Enrollment"); // Redirect Employee to available policies (example)
-                }
-                else
-                {
-                    // Default redirect if role is not explicitly handled
-                    return RedirectToAction("Index", "Home");
-                }
-            }
-            else
-            {
-                // If login fails, add an error message to ModelState
-                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                new System.Security.Claims.Claim(ClaimTypes.Name, model.Username), // Store username
+            };
 
-                // Return the view with the error message
-                // You might also repopulate the form fields if needed, but for passwords, it's usually not done.
-                return View();
+            string userRole = string.Empty;
+            int userId = 0; // To store AdminId or EmployeeId
+
+            if (user is Admin adminUser)
+            {
+                claims.Add(new System.Security.Claims.Claim(ClaimTypes.Role, "Admin")); // Add Admin role claim
+                claims.Add(new System.Security.Claims.Claim("AdminId", adminUser.AdminId.ToString())); // Custom claim for AdminId
+                userRole = "Admin";
+                userId = adminUser.AdminId;
             }
+            else if (user is Employee employeeUser)
+            {
+                claims.Add(new System.Security.Claims.Claim(ClaimTypes.Role, "Employee")); // Add Employee role claim
+                claims.Add(new System.Security.Claims.Claim("EmployeeId", employeeUser.EmployeeId.ToString())); // Custom claim for EmployeeId
+                userRole = "Employee";
+                userId = employeeUser.EmployeeId;
+            }
+
+            // Create ClaimsIdentity and ClaimsPrincipal
+            var claimsIdentity = new ClaimsIdentity(
+                claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+            var authProperties = new AuthenticationProperties
+            {
+                // Allow refreshing the authentication session cookie
+                AllowRefresh = true,
+                // IsPersistent = model.RememberMe, // Use if you implement "Remember Me"
+                ExpiresUtc = System.DateTimeOffset.UtcNow.AddMinutes(30) // Set cookie expiration
+            };
+
+            // Sign in the user
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(claimsIdentity),
+                authProperties);
+
+            // Redirect based on role after successful login
+            if (userRole == "Admin")
+            {
+                return RedirectToAction("Index", "Employee"); // Admin goes to Employee management
+            }
+            else if (userRole == "Employee")
+            {
+                // Employee goes to their enrolled policies
+                return RedirectToAction("EnrolledPolicies", "Enrollment", new { employeeId = userId });
+            }
+
+            // Fallback redirect for unexpected scenarios
+            return RedirectToAction("Index", "Home");
         }
 
-        // You would add a Logout action here later
-        // [HttpPost]
-        // public async Task<IActionResult> Logout() { ... }
+        // GET: /Account/Logout
+        // Handles user logout.
+        [HttpGet]
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToAction("Login", "Account"); // Redirect to login page after logout
+        }
+
+        // GET: /Account/AccessDenied
+        // Displays a message when a user tries to access a restricted resource.
+        public IActionResult AccessDenied()
+        {
+            return View(); // You will create an AccessDenied.cshtml view
+        }
     }
 }
 

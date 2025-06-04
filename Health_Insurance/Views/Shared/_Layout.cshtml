@@ -7,93 +7,116 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Health_Insurance.styles.css" asp-append-version="true" />
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            /* Optional: Add a subtle background color or gradient to the body */
-            /* background-color: #f8f9fa; */
-            /* CSS for sticky footer */
-            /* display: flex; */
-            /* flex-direction: column; */
-            /* min-height: 100vh; /* Ensure body takes at least the full viewport height */ */
-        }
-        /* Optional: Add some padding to the main content area */
-        main {
-            padding-top: 20px;
-            padding-bottom: 20px;
-            flex-grow: 1; /* Allow main content to grow and push footer down */
-        }
-
-        /* Ensure footer does not shrink */
-        footer {
-            flex-shrink: 0;
-        }
-    </style>
 </head>
 <body>
-    @* This is the HTML for the Navbar. You should place this in your Views/Shared/_Layout.cshtml file. *@
-    @* Ensure you have Bootstrap 5 CSS and JS included in your _Layout.cshtml *@
-
-    @* This is the HTML for the Navbar. You should place this in your Views/Shared/_Layout.cshtml file. *@
-    @* Ensure you have Bootstrap 5 CSS and JS included in your _Layout.cshtml *@
-
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm bg-info navbar-dark border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                @* Application Brand/Name *@
-                @* Use asp-area, asp-controller, asp-action to link to your Home page or other main page *@
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Health Insurance System</a>
-                @* Toggle button for collapsing the navbar on smaller screens *@
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Health_Insurance</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                @* Navbar links container - collapses on smaller screens *@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
-                        @* ... other nav items ... *@
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Account" asp-action="Login">Login</a> @* Adjust text-light if needed based on your navbar color *@
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
-                        @* Link to Employee Page *@
                         <li class="nav-item">
-                            @* Use asp-controller and asp-action for MVC routing *@
-                            <a class="nav-link text-light" asp-area="" asp-controller="Employee" asp-action="Index">Employees</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
-                        @* Link to Enrollment Page *@
-                        <li class="nav-item">
-                            @* Use asp-controller and asp-action for MVC routing *@
-                            <a class="nav-link text-light" asp-area="" asp-controller="Enrollment" asp-action="Index">Enrollments</a>
-                        </li>
-                        @* Link to Claims Page (Optional, based on your module) *@
-                        <li class="nav-item">
-                             <a class="nav-link text-light" asp-area="" asp-controller="Claim" asp-action="ListAllClaims">Claims</a>
-                        </li>
-                        @* Link to Premium Calculator Page (Optional, based on your module) *@
-                        <li class="nav-item"> 
-                             <a class="nav-link text-light" asp-area="" asp-controller="PremiumCalculator" asp-action="CalculatePremium">Premium Calculator</a>
-                        </li>
-                        @* Add other navigation links here *@
+
+                        @* --- Conditional Navigation Links based on Authentication and Role --- *@
+
+                        @* If the user is authenticated (logged in) *@
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            @* Links visible to ALL authenticated users *@
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="PremiumCalculator" asp-action="CalculatePremium">Premium Calculator</a>
+                            </li>
+
+                            @* Links visible ONLY to Admin users *@
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Employee" asp-action="Index">Employees</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Organization" asp-action="Index">Organizations</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Policies" asp-action="Index">Policies</a> @* Corrected Controller Name *@
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Enrollment" asp-action="Index">Enrollments (Admin)</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Claim" asp-action="ListAllClaims">Claims (Admin)</a>
+                                </li>
+                            }
+
+                            @* Links visible ONLY to Employee users *@
+                            @if (User.IsInRole("Employee"))
+                            {
+                                // Declare variables here once, accessible throughout this entire 'if' block
+                                System.Security.Claims.Claim employeeIdClaim = User.FindFirst("EmployeeId");
+                                int employeeId = 0; // Initialize with a default value
+
+                                <li class="nav-item">
+                                    @if (employeeIdClaim != null && int.TryParse(employeeIdClaim.Value, out employeeId))
+                                    {
+                                        <a class="nav-link text-dark" asp-area="" asp-controller="Enrollment" asp-action="EnrolledPolicies" asp-route-employeeId="@employeeId">My Enrollments</a>
+                                    }
+                                    else
+                                    {
+                                        <a class="nav-link text-dark" href="#">My Enrollments (Login Required)</a> @* Fallback if EmployeeId not found in claims *@
+                                    }
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Claim" asp-action="SubmitClaim">Submit Claim</a>
+                                </li>
+                                <li class="nav-item">
+                                    @if (employeeIdClaim != null && int.TryParse(employeeIdClaim.Value, out employeeId))
+                                    {
+                                        <a class="nav-link text-dark" asp-area="" asp-controller="Claim" asp-action="ListAllClaims" asp-route-employeeId="@employeeId">My Claims</a>
+                                    }
+                                    else
+                                    {
+                                        <a class="nav-link text-dark" href="#">My Claims (Login Required)</a> @* Fallback if EmployeeId not found in claims *@
+                                    }
+                                </li>
+                            }
+
+                            @* Logout link for all authenticated users *@
+                            <li class="nav-item">
+                                <form asp-controller="Account" asp-action="Logout" method="get" class="form-inline">
+                                    <button type="submit" class="nav-link btn btn-link text-dark">Logout (@User.Identity.Name)</button>
+                                </form>
+                            </li>
+                        }
+                        else // If the user is NOT authenticated (not logged in)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Login">Login</a>
+                            </li>
+                        }
+                        @* --- End Conditional Navigation Links --- *@
+
                     </ul>
                 </div>
             </div>
         </nav>
     </header>
-
-
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted bg-dark text-light py-2">
+    <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2025 - Health_Insurance - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2024 - Health_Insurance - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

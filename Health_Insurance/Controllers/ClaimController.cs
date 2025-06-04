@@ -5,219 +5,300 @@ using Health_Insurance.Services; // Ensure namespace is correct for your Service
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore; // Needed for .ToListAsync()
 using System.Threading.Tasks;
-using System.Collections.Generic; // Needed for IEnumerable and List
-using Microsoft.AspNetCore.Mvc.Rendering; // Needed for SelectList
-using System.Linq; // Needed for .ToList()
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Linq;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims; // Still needed for ClaimTypes, ClaimsPrincipal, etc.
 
-namespace Health_Insurance.Controllers // Ensure this namespace is correct for your Controllers folder
+namespace Health_Insurance.Controllers
 {
-    // Controller to handle requests related to Claims Management
+    // All actions in this controller require authentication by default.
+    [Authorize]
     public class ClaimController : Controller
     {
-        // Inject the Claim Service interface
         private readonly IClaimService _claimService;
-        // Inject the ApplicationDbContext to fetch data for dropdowns
-        private readonly ApplicationDbContext _context; // Inject DbContext
+        private readonly ApplicationDbContext _context;
 
-        // Constructor: Inject the Claim Service and DbContext
-        public ClaimController(IClaimService claimService, ApplicationDbContext context) // Add DbContext to constructor
+        public ClaimController(IClaimService claimService, ApplicationDbContext context)
         {
             _claimService = claimService;
-            _context = context; // Assign injected DbContext
+            _context = context;
         }
 
         // GET: /Claim/ListAllClaims or /Claim
-        // Action to list all claims
-        public async Task<IActionResult> ListAllClaims() // Or Index()
+        // Accessible to all authenticated users.
+        // Admins see all claims. Employees see only their own claims.
+        public async Task<IActionResult> ListAllClaims(int? employeeId = null) // Make employeeId nullable
         {
-            // Use the Claim Service to get all claims
-            var claims = await _claimService.ListAllClaimsAsync();
-            // Pass the list of claims to the view
-            return View(claims); // You will need to create a ListAllClaims.cshtml view
+            IEnumerable<Health_Insurance.Models.Claim> claims; // Explicitly use your model's Claim
+
+            if (User.IsInRole("Admin"))
+            {
+                // Admin sees all claims
+                claims = await _claimService.ListAllClaimsAsync();
+            }
+            else if (User.IsInRole("Employee"))
+            {
+                // Explicitly qualify System.Security.Claims.Claim
+                System.Security.Claims.Claim employeeIdClaim = User.FindFirst("EmployeeId");
+                if (employeeIdClaim == null || !int.TryParse(employeeIdClaim.Value, out int actualEmployeeId))
+                {
+                    return Forbid(); // EmployeeId claim missing or invalid
+                }
+
+                // Employee sees only their own claims, ensure the parameter matches logged-in user
+                if (employeeId == null || employeeId.Value != actualEmployeeId)
+                {
+                    // If employeeId is not provided or doesn't match, use the logged-in employeeId
+                    employeeId = actualEmployeeId;
+                }
+                else if (employeeId.Value != actualEmployeeId)
+                {
+                    // Attempt by an Employee to view someone else's claims by passing a different employeeId
+                    return Forbid();
+                }
+
+                // Filter claims by the authenticated employee's ID
+                claims = (await _claimService.ListAllClaimsAsync()).Where(c => c.Enrollment.EmployeeId == employeeId.Value);
+            }
+            else
+            {
+                // Should not happen with [Authorize] but as a fallback
+                return Forbid();
+            }
+
+            return View(claims);
         }
 
         // GET: /Claim/SubmitClaim
-        // Action to display the form for submitting a new claim
-        public async Task<IActionResult> SubmitClaim() // Made async to fetch enrollments
+        // Accessible to all authenticated users.
+        public async Task<IActionResult> SubmitClaim()
         {
-            // Fetch all Enrollments to populate the dropdown
-            // Include Employee and Policy to display helpful info in the dropdown text
-            var enrollments = await _context.Enrollments
-                                            .Include(e => e.Employee)
-                                            .Include(e => e.Policy)
-                                            .ToListAsync();
+            // Only allow employees to submit claims for themselves.
+            // Admin can submit for anyone, but this form is typically for employees.
+            if (User.IsInRole("Employee"))
+            {
+                // Explicitly qualify System.Security.Claims.Claim
+                System.Security.Claims.Claim employeeIdClaim = User.FindFirst("EmployeeId");
+                if (employeeIdClaim == null || !int.TryParse(employeeIdClaim.Value, out int actualEmployeeId))
+                {
+                    return Forbid(); // EmployeeId claim missing or invalid
+                }
 
-            // Create a SelectList for the Enrollment dropdown
-            // Value: EnrollmentId, Text: A combination of Employee Name and Policy Name
-            // Using a more descriptive text for the dropdown options
-            ViewBag.EnrollmentList = new SelectList(enrollments.Select(e => new {
-                EnrollmentId = e.EnrollmentId,
-                DisplayText = $"Enrollment #{e.EnrollmentId} - {e.Employee?.Name ?? "Unknown Employee"} ({e.Policy?.PolicyName ?? "Unknown Policy"})" // Handle potential nulls
-            }), "EnrollmentId", "DisplayText");
+                // Fetch enrollments only for the logged-in employee
+                var enrollments = await _context.Enrollments
+                                                .Include(e => e.Policy)
+                                                .Where(e => e.EmployeeId == actualEmployeeId) // Filter by logged-in employee
+                                                .ToListAsync();
 
+                ViewBag.EnrollmentList = new SelectList(enrollments.Select(e => new {
+                    EnrollmentId = e.EnrollmentId,
+                    DisplayText = $"Enrollment #{e.EnrollmentId} - {e.Policy?.PolicyName ?? "Unknown Policy"}"
+                }), "EnrollmentId", "DisplayText");
+            }
+            else if (User.IsInRole("Admin"))
+            {
+                // Admin can see all enrollments
+                var enrollments = await _context.Enrollments
+                                                .Include(e => e.Employee)
+                                                .Include(e => e.Policy)
+                                                .ToListAsync();
+                ViewBag.EnrollmentList = new SelectList(enrollments.Select(e => new {
+                    EnrollmentId = e.EnrollmentId,
+                    DisplayText = $"Enrollment #{e.EnrollmentId} - {e.Employee?.Name ?? "Unknown Employee"} ({e.Policy?.PolicyName ?? "Unknown Policy"})"
+                }), "EnrollmentId", "DisplayText");
+            }
+            else
+            {
+                return Forbid(); // Not an Admin or Employee
+            }
 
-            return View(); // Return the SubmitClaim.cshtml view
+            return View();
         }
 
         // POST: /Claim/SubmitClaim
-        // Action to handle the submission of the new claim form
         [HttpPost]
-        [ValidateAntiForgeryToken] // Prevents CSRF attacks
-        // The [Bind] attribute explicitly lists the properties allowed to be bound from the form.
-        // ClaimStatus and Enrollment are intentionally excluded as they are not directly submitted by the form.
-        public async Task<IActionResult> SubmitClaim([Bind("EnrollmentId,ClaimAmount,ClaimReason,ClaimDate")] Claim claim)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SubmitClaim([Bind("EnrollmentId,ClaimAmount,ClaimReason,ClaimDate")] Health_Insurance.Models.Claim claim) // Explicitly qualify your model's Claim
         {
-            // ModelState.IsValid will be true ONLY if all [Required] fields included in [Bind] are provided
-            // and other validation rules (like DataType, StringLength) for those bound fields are met.
+            // Validate that the submitted EnrollmentId belongs to the logged-in employee if they are an Employee
+            if (User.IsInRole("Employee"))
+            {
+                // Explicitly qualify System.Security.Claims.Claim
+                System.Security.Claims.Claim employeeIdClaim = User.FindFirst("EmployeeId");
+                if (employeeIdClaim == null || !int.TryParse(employeeIdClaim.Value, out int actualEmployeeId))
+                {
+                    ModelState.AddModelError(string.Empty, "Employee ID not found in claims.");
+                    return await RePopulateSubmitClaimDropdown(claim);
+                }
+
+                var enrollment = await _context.Enrollments.AsNoTracking().FirstOrDefaultAsync(e => e.EnrollmentId == claim.EnrollmentId);
+                if (enrollment == null || enrollment.EmployeeId != actualEmployeeId)
+                {
+                    ModelState.AddModelError("EnrollmentId", "You can only submit claims for your own enrollments.");
+                    return await RePopulateSubmitClaimDropdown(claim);
+                }
+            }
+
             if (ModelState.IsValid)
             {
-                // Use the Claim Service to submit the claim
-                // The service should set the initial status (e.g., "SUBMITTED")
                 var success = await _claimService.SubmitClaimAsync(claim);
 
                 if (success)
                 {
-                    // Redirect to a page showing claim details or a success message
-                    // For now, redirect to the list of all claims
                     return RedirectToAction(nameof(ListAllClaims));
                 }
                 else
                 {
-                    // Handle submission failure (e.g., invalid enrollment ID, service logic failure)
                     ViewBag.ErrorMessage = "Claim submission failed. Please check the Enrollment ID.";
-                    // Repopulate dropdowns if needed and return the view with submitted data
-                    var enrollments = await _context.Enrollments.Include(e => e.Employee).Include(e => e.Policy).ToListAsync();
-                    ViewBag.EnrollmentList = new SelectList(enrollments.Select(e => new {
-                        EnrollmentId = e.EnrollmentId,
-                        DisplayText = $"Enrollment #{e.EnrollmentId} - {e.Employee?.Name ?? "Unknown Employee"} ({e.Policy?.PolicyName ?? "Unknown Policy"})"
-                    }), "EnrollmentId", "DisplayText", claim.EnrollmentId);
-
-                    return View(claim); // Return the view with errors
+                    return await RePopulateSubmitClaimDropdown(claim);
                 }
             }
-            // If model state is not valid (due to missing required fields or invalid data types for bound fields),
-            // return the view with submitted data to show validation errors.
-            // Repopulate dropdowns so the user doesn't lose their selection context.
-            var enrollmentsInvalid = await _context.Enrollments.Include(e => e.Employee).Include(e => e.Policy).ToListAsync();
-            ViewBag.EnrollmentList = new SelectList(enrollmentsInvalid.Select(e => new {
-                EnrollmentId = e.EnrollmentId,
-                DisplayText = $"Enrollment #{e.EnrollmentId} - {e.Employee?.Name ?? "Unknown Employee"} ({e.Policy?.PolicyName ?? "Unknown Policy"})"
-            }), "EnrollmentId", "DisplayText", claim.EnrollmentId);
-
-            return View(claim);
+            return await RePopulateSubmitClaimDropdown(claim);
         }
+
+        // Helper to repopulate dropdown for SubmitClaim view
+        private async Task<IActionResult> RePopulateSubmitClaimDropdown(Health_Insurance.Models.Claim claim) // Explicitly qualify your model's Claim
+        {
+            if (User.IsInRole("Employee"))
+            {
+                // Explicitly qualify System.Security.Claims.Claim
+                System.Security.Claims.Claim employeeIdClaim = User.FindFirst("EmployeeId");
+                if (employeeIdClaim == null || !int.TryParse(employeeIdClaim.Value, out int actualEmployeeId))
+                {
+                    // This case should ideally be caught earlier by Forbid()
+                    return Forbid();
+                }
+                var enrollments = await _context.Enrollments
+                                                .Include(e => e.Policy)
+                                                .Where(e => e.EmployeeId == actualEmployeeId)
+                                                .ToListAsync();
+                ViewBag.EnrollmentList = new SelectList(enrollments.Select(e => new {
+                    EnrollmentId = e.EnrollmentId,
+                    DisplayText = $"Enrollment #{e.EnrollmentId} - {e.Policy?.PolicyName ?? "Unknown Policy"}"
+                }), "EnrollmentId", "DisplayText", claim.EnrollmentId);
+            }
+            else if (User.IsInRole("Admin"))
+            {
+                var enrollments = await _context.Enrollments
+                                                .Include(e => e.Employee)
+                                                .Include(e => e.Policy)
+                                                .ToListAsync();
+                ViewBag.EnrollmentList = new SelectList(enrollments.Select(e => new {
+                    EnrollmentId = e.EnrollmentId,
+                    DisplayText = $"Enrollment #{e.EnrollmentId} - {e.Employee?.Name ?? "Unknown Employee"} ({e.Policy?.PolicyName ?? "Unknown Policy"})"
+                }), "EnrollmentId", "DisplayText", claim.EnrollmentId);
+            }
+            return View("SubmitClaim", claim);
+        }
+
 
         // GET: /Claim/GetClaimDetails/5
-        // Action to display details of a specific claim
-        public async Task<IActionResult> GetClaimDetails(int? id) // Using 'id' is standard for details
+        // Accessible to all authenticated users. Admin can view any. Employee can view their own.
+        public async Task<IActionResult> GetClaimDetails(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            // Use the Claim Service to get claim details
-            // The service should include Enrollment and Policy details
-            var claim = await _claimService.GetClaimDetailsAsync(id.Value); // Use .Value for nullable int
-
-            if (claim == null)
-            {
-                return NotFound(); // Claim not found
-            }
-
-            // Pass the claim object to the view
-            return View(claim); // Return the GetClaimDetails.cshtml view
-        }
-
-        // GET: /Claim/UpdateClaimStatus/5
-        // Action to display a form for updating claim status
-        public async Task<IActionResult> UpdateClaimStatus(int? id) // Using 'id' for the claim to update
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            // Use the Claim Service to get claim details to display on the form
             var claim = await _claimService.GetClaimDetailsAsync(id.Value);
 
             if (claim == null)
             {
-                return NotFound(); // Claim not found
+                return NotFound();
             }
 
-            // Create a list of possible statuses
-            var statuses = new List<string> { "SUBMITTED", "APPROVED", "REJECTED" };
-            // Create a SelectList for the Status dropdown, pre-selecting the current status
-            ViewBag.Statuses = new SelectList(statuses, claim.ClaimStatus); // Use the overload that takes the selected value
+            // Enforce that an Employee can only view their own claims
+            if (User.IsInRole("Employee"))
+            {
+                // Explicitly qualify System.Security.Claims.Claim
+                System.Security.Claims.Claim employeeIdClaim = User.FindFirst("EmployeeId");
+                if (employeeIdClaim == null || !int.TryParse(employeeIdClaim.Value, out int actualEmployeeId) || claim.Enrollment.EmployeeId != actualEmployeeId)
+                {
+                    return Forbid(); // Attempt by an Employee to view someone else's claim
+                }
+            }
 
-            // Pass the claim object to the view
-            return View(claim); // Return the UpdateClaimStatus.cshtml view
+            return View(claim);
+        }
+
+        // GET: /Claim/UpdateClaimStatus/5
+        // Restricted to Admin users only.
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UpdateClaimStatus(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var claim = await _claimService.GetClaimDetailsAsync(id.Value);
+
+            if (claim == null)
+            {
+                return NotFound();
+            }
+
+            var statuses = new List<string> { "SUBMITTED", "APPROVED", "REJECTED" };
+            ViewBag.Statuses = new SelectList(statuses, claim.ClaimStatus);
+
+            return View(claim);
         }
 
         // POST: /Claim/UpdateClaimStatus/5
-        // Action to handle the submission of the status update form
+        // Restricted to Admin users only.
         [HttpPost]
-        [ValidateAntiForgeryToken] // Prevents CSRF attacks
-        public async Task<IActionResult> UpdateClaimStatus(int id, [Bind("ClaimId,ClaimStatus,ClaimReason")] Claim claim) // Bind only necessary fields
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UpdateClaimStatus(int id, [Bind("ClaimId,ClaimStatus")] Health_Insurance.Models.Claim claim) // Explicitly qualify your model's Claim
         {
-            // Check if the id in the URL matches the id in the submitted form data
             if (id != claim.ClaimId)
             {
                 return NotFound();
             }
 
-            // Basic validation on the submitted model (only ClaimId and ClaimStatus are bound)
             if (ModelState.IsValid)
             {
                 try
                 {
-                    // Use the Claim Service to update the status
                     var success = await _claimService.UpdateClaimStatusAsync(claim.ClaimId, claim.ClaimStatus);
 
                     if (success)
                     {
-                        // Redirect to the claim details page or list of claims
-                        return RedirectToAction(nameof(GetClaimDetails), new { id = claim.ClaimId }); // Redirect to details
-                        // Or RedirectToAction(nameof(ListAllClaims));
+                        return RedirectToAction(nameof(GetClaimDetails), new { id = claim.ClaimId });
                     }
                     else
                     {
-                        // Handle update failure (e.g., claim not found, invalid status)
                         ViewBag.ErrorMessage = "Failed to update claim status. Please check the Claim ID or status.";
-                        // Repopulate dropdowns and return the view
                         var statuses = new List<string> { "SUBMITTED", "APPROVED", "REJECTED" };
-                        ViewBag.Statuses = new SelectList(statuses, claim.ClaimStatus); // Use the overload that takes the selected value
-                        return View(claim); // Return the view with errors
+                        ViewBag.Statuses = new SelectList(statuses, claim.ClaimStatus);
+                        return View(claim);
                     }
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    // Handle concurrency conflicts (e.g., another user updated the same record)
-                    if (!ClaimExists(claim.ClaimId)) // Use ClaimExists instead of EmployeeExists
+                    if (!ClaimExists(claim.ClaimId))
                     {
                         return NotFound();
                     }
                     else
                     {
-                        throw; // Re-throw the exception if it's not a "not found" issue
+                        throw;
                     }
                 }
             }
-            // If model state is not valid, return the view with submitted data
-            // Repopulate dropdowns
             var statusesInvalid = new List<string> { "SUBMITTED", "APPROVED", "REJECTED" };
-            ViewBag.Statuses = new SelectList(statusesInvalid, claim.ClaimStatus); // Use the overload that takes the selected value
+            ViewBag.Statuses = new SelectList(statusesInvalid, claim.ClaimStatus);
             return View(claim);
         }
 
-        // Helper method to check if a claim exists (Corrected from EmployeeExists)
+        // Helper method to check if a claim exists
         private bool ClaimExists(int id)
         {
             return _context.Claims.Any(e => e.ClaimId == id);
         }
-
-        // You would add other actions as needed for claims management workflow
     }
 }
 
