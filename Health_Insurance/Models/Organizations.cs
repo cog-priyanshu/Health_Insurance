@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Health_Insurance.Models // Ensure this namespace is correct based on your project name
 {
     // Represents an Organization entity, mapping to the Organization table in the database.
-    public class Organization
+    public class Organizations
     {
         [Key]
         public int OrganizationId { get; set; }

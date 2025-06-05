@@ -2,12 +2,31 @@
 
 @{
     ViewData["Title"] = "Login"; // Set the page title
-    Layout = "~/Views/Shared/_Layout.cshtml"; // Specify the layout file to use
+    Layout = "~/Views/Shared/_Layout.cshtml"; //Specify the layout file to use
+    
 }
 
 @* Custom CSS for the login page. Removed body styling from here. *@
 <style>
-    /* Removed body styling from here to prevent conflict with _Layout.cshtml */
+    /* Custom styles for professional aesthetics and subtle animations */
+
+    /* General body styling for a clean, light background with aurora effect */
+    body {
+        /* Aurora-like background with light, ethereal shades - professional color combination */
+        background: radial-gradient(at 20% 80%, rgba(150, 200, 255, 0.7) 0%, transparent 55%), /* Brighter Light Blue */
+        radial-gradient(at 80% 20%, rgba(200, 180, 230, 0.7) 0%, transparent 55%), /* Subtle Lavender/Purple */
+        radial-gradient(at 50% 50%, rgba(180, 255, 200, 0.7) 0%, transparent 65%); /* Brighter Light Mint Green */
+        background-color: #EBF3F8; /* A slightly deeper light blue fallback */
+        font-family: 'Inter', sans-serif; /* Modern and clean font */
+        color: #34495E; /* Dark gray for general text for good readability */
+        min-height: 100vh; /* Ensure body takes full viewport height */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        overflow-x: hidden; /* Prevent horizontal scroll */
+        position: relative; /* For background positioning */
+    }
 
     .login-wrapper {
         /* This wrapper will take up the full height of the main content area */
@@ -16,49 +35,161 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        /* Apply the gradient background to this wrapper */
-        background: linear-gradient(to right, #6a11cb, #2575fc);
+        /* Make wrapper background transparent to show body's aurora effect */
+        background: rgba(255, 255, 255, 0); /* Transparent background */
         margin: -20px; /* Adjust to remove padding from main container if necessary */
         padding: 20px; /* Add back padding if margin is negative */
     }
 
     .login-container {
-        background-color: #ffffff; /* White background for the login card */
+        background-color: rgba(255, 255, 255, 0.2); /* More translucent white for a pronounced glass effect */
         padding: 40px;
-        border-radius: 15px; /* Rounded corners */
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); /* Soft shadow */
+        border-radius: 1.25rem; /* Even larger rounded corners for a softer, premium look */
+        box-shadow: 0 0.75rem 2.5rem rgba(0, 0, 0, 0.1); /* Softer, deeper shadow for elegant depth */
         width: 100%;
         max-width: 450px; /* Max width for the login card */
+        backdrop-filter: blur(20px); /* Increased blur for stronger glass effect */
+        -webkit-backdrop-filter: blur(20px); /* Safari support */
+        border: 1px solid rgba(255, 255, 255, 0.6); /* More prominent white border for definition */
+        position: relative;
+        transition: box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out; /* Smooth transition for uplift */
     }
-    .login-container h2 {
-        margin-bottom: 30px;
-        text-align: center;
-        color: #333;
-    }
+
+        .login-container:hover {
+            box-shadow: 0 1.2rem 4rem rgba(0, 0, 0, 0.15); /* More pronounced shadow on hover */
+            transform: translateY(-5px); /* Slight uplift effect on hover */
+        }
+
+        .login-container h2 {
+            margin-bottom: 30px;
+            text-align: center;
+            color: #2C3E50; /* Deep, dark blue/charcoal for a strong heading */
+            font-weight: 700;
+        }
+
     .form-control {
-        border-radius: 8px; /* Rounded form inputs */
+        border-radius: 0.5rem; /* Rounded input fields */
+        border: 1px solid rgba(255, 255, 255, 0.6); /* More prominent white border for inputs */
+        padding: 0.75rem 1rem; /* Comfortable padding */
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05); /* Inner shadow for depth */
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        background-color: rgba(255, 255, 255, 0.15); /* Translucent white background for inputs */
+        backdrop-filter: blur(10px); /* Apply blur to the input itself */
+        -webkit-backdrop-filter: blur(10px); /* Safari support */
+        color: #34495E; /* Ensure text color is readable on the translucent background */
     }
-    .btn-login {
-        border-radius: 8px; /* Rounded buttons */
-        padding: 10px 20px;
-        font-size: 1.1rem;
+
+        .form-control:focus {
+            border-color: #88BBDD; /* Highlight on focus */
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05), 0 0 0 0.2rem rgba(52, 152, 219, 0.25); /* Subtle blue focus ring */
+            outline: none; /* Remove default outline */
+        }
+
+    /* Button styling for a modern, interactive feel */
+    .btn {
+        border-radius: 0.6rem; /* Rounded corners for individual buttons */
+        padding: 0.5rem 1rem; /* Comfortable padding for buttons */
+        font-weight: 500; /* Medium font weight for text */
+        text-transform: uppercase; /* Uppercase text for a professional touch */
+        box-shadow: 0 0.25rem 0.6rem rgba(0, 0, 0, 0.1); /* Subtle shadow for buttons */
+        font-size: 0.75rem; /* Font size for buttons */
+        position: relative; /* Needed for pseudo-element positioning */
+        overflow: hidden; /* To clip the pseudo-element */
+        z-index: 1; /* Ensure text is above pseudo-element */
+        transition: color 0.3s ease, transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease; /* Only text color transition */
+        background-color: transparent; /* Start with transparent background */
         width: 100%; /* Full width button */
     }
+
+        /* Pseudo-element for the water spilling effect */
+        .btn::before { /* Apply to all buttons with .btn */
+            content: '';
+            position: absolute;
+            bottom: 0; /* Start from the bottom */
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 0.6rem; /* Match button border-radius */
+            z-index: -1; /* Behind the button text */
+            transform: scaleY(0); /* Start hidden at the bottom */
+            transform-origin: bottom; /* Animate from bottom up */
+            transition: transform 0.3s ease-out; /* Animation for the fill */
+        }
+
+        .btn:hover::before {
+            transform: scaleY(1); /* Fill up on hover */
+        }
+
+        .btn:hover {
+            transform: translateY(-2px); /* Slight lift on hover */
+            box-shadow: 0 0.4rem 0.8rem rgba(0, 0, 0, 0.15); /* More pronounced shadow on hover */
+            color: white; /* Text turns white on hover */
+        }
+
+    /* Specific button color adjustments for a palette */
+    .btn-primary {
+        border: 1px solid #007bff; /* A standard, professional blue outline */
+        color: #007bff; /* Text color matches outline */
+    }
+
+        .btn-primary::before {
+            background-color: #0056b3; /* Darker blue fill color for primary button on hover */
+        }
+
+        .btn-primary:hover {
+            border-color: #0056b3; /* Darker blue outline on hover */
+        }
+
+    .btn-success { /* Used for employee login button */
+        border: 1px solid #28a745; /* Bootstrap success green outline */
+        color: #28a745; /* Text color matches outline */
+    }
+
+        .btn-success::before {
+            background-color: #218838; /* Darker green fill color for success button on hover */
+        }
+
+        .btn-success:hover {
+            border-color: #218838; /* Darker green outline on hover */
+        }
+
+    /* Tab styling */
     .nav-tabs .nav-link {
-        color: #495057; /* Default tab text color */
+        color: #34495E; /* Default tab text color */
         border: none;
         border-bottom: 2px solid transparent;
         margin-bottom: -1px; /* Adjust to align with border */
-        border-top-left-radius: 8px;
-        border-top-right-radius: 8px;
+        border-top-left-radius: 0.6rem; /* Match button border-radius */
+        border-top-right-radius: 0.6rem; /* Match button border-radius */
+        padding: 0.75rem 1.25rem; /* Comfortable padding for tabs */
+        transition: color 0.3s ease, border-color 0.3s ease;
     }
-    .nav-tabs .nav-link.active {
-        color: #007bff; /* Active tab text color (Bootstrap primary blue) */
-        border-bottom-color: #007bff; /* Active tab underline color */
-        font-weight: 600;
-    }
+
+        .nav-tabs .nav-link.active {
+            color: #007bff; /* Active tab text color (Bootstrap primary blue) */
+            border-bottom-color: #007bff; /* Active tab underline color */
+            font-weight: 600;
+            background-color: rgba(255, 255, 255, 0.15); /* Slightly translucent background for active tab */
+            backdrop-filter: blur(5px); /* Subtle blur for active tab */
+            -webkit-backdrop-filter: blur(5px); /* Safari support */
+        }
+
     .tab-content {
         padding-top: 20px;
+    }
+
+    .form-label { /* Consistent label styling */
+        font-weight: 600;
+        color: #34495E;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .text-danger { /* Consistent validation message styling */
+        color: #E74C3C;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: block;
     }
 </style>
 
@@ -87,8 +218,8 @@
             <div class="tab-pane fade show active" id="adminLogin" role="tabpanel" aria-labelledby="admin-tab">
                 @* Use asp-action and asp-controller to target the POST Login action *@
                 <form asp-action="Login" asp-controller="Account" method="post">
-                     @* Include the Anti-Forgery Token *@
-                     @Html.AntiForgeryToken()
+                    @* Include the Anti-Forgery Token *@
+                    @Html.AntiForgeryToken()
                     <div class="mb-3">
                         <label asp-for="Username" class="form-label"></label> @* Use asp-for for Username *@
                         <input asp-for="Username" class="form-control" placeholder="Enter Admin Username"> @* Use asp-for for Username *@
@@ -107,10 +238,10 @@
 
             <!-- Employee Login Form -->
             <div class="tab-pane fade" id="employeeLogin" role="tabpanel" aria-labelledby="employee-tab">
-                 @* Use asp-action and asp-controller to target the POST Login action *@
-                 <form asp-action="Login" asp-controller="Account" method="post">
-                     @* Include the Anti-Forgery Token *@
-                     @Html.AntiForgeryToken()
+                @* Use asp-action and asp-controller to target the POST Login action *@
+                <form asp-action="Login" asp-controller="Account" method="post">
+                    @* Include the Anti-Forgery Token *@
+                    @Html.AntiForgeryToken()
                     <div class="mb-3">
                         <label asp-for="Username" class="form-label"></label> @* Use asp-for for Username *@
                         <input asp-for="Username" class="form-control" placeholder="Enter Employee Username"> @* Use asp-for for Username *@
@@ -135,7 +266,9 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 
     <script>
         $(document).ready(function() {
@@ -144,8 +277,3 @@
         });
     </script>
 }
-
-
-
-
-

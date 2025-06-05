@@ -5,60 +5,243 @@
     ViewData["Title"] = "Delete Employee";
 }
 
-<h1 class="mb-4 text-danger">Delete Employee</h1> @* Highlight delete heading in danger color *@
+<style>
+    /* Custom styles for professional aesthetics and subtle animations */
 
-<h3 class="mb-3">Are you sure you want to delete this?</h3> @* Added margin-bottom *@
+    /* General body styling for a clean, light background with aurora effect */
+    body {
+        /* Aurora-like background with light, ethereal shades - professional color combination */
+        background: radial-gradient(at 20% 80%, rgba(150, 200, 255, 0.7) 0%, transparent 55%), /* Brighter Light Blue */
+        radial-gradient(at 80% 20%, rgba(200, 180, 230, 0.7) 0%, transparent 55%), /* Subtle Lavender/Purple */
+        radial-gradient(at 50% 50%, rgba(180, 255, 200, 0.7) 0%, transparent 65%); /* Brighter Light Mint Green */
+        background-color: #EBF3F8; /* A slightly deeper light blue fallback */
+        font-family: 'Inter', sans-serif; /* Modern and clean font */
+        color: #34495E; /* Dark gray for general text for good readability */
+        min-height: 100vh; /* Ensure body takes full viewport height */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        overflow-x: hidden; /* Prevent horizontal scroll */
+        position: relative; /* For background positioning */
+    }
 
-<div>
-    <h4>Employee</h4>
-    <hr />
-    @* Use Bootstrap row and column for layout and display classes *@
-    <dl class="row">
-        @* Use dl, dt, dd with row/col for definition list layout *@
-        @* Displaying properties of the Employee to be deleted *@
-        <dt class="col-sm-3">
-            @* Use column for label *@
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-        <dd class="col-sm-9">
-            @* Use column for value *@
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.Email)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.Email)
-        </dd>
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.Phone)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.Phone)
-        </dd>
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.Designation)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.Designation)
-        </dd>
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.Organization)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.Organization.OrganizationName)
-        </dd>
-    </dl>
+    /* Container styling for a sophisticated card-like appearance */
+    .form-container { /* Reusing form-container for consistency in styling */
+        background-color: rgba(255, 255, 255, 0.2); /* More translucent white for a pronounced glass effect */
+        padding: 3rem; /* Increased padding for a more spacious feel */
+        border-radius: 1.25rem; /* Even larger rounded corners for a softer, premium look */
+        box-shadow: 0 0.75rem 2.5rem rgba(0, 0, 0, 0.1); /* Softer, deeper shadow for elegant depth */
+        margin: auto; /* Center horizontally and provide vertical margin */
+        backdrop-filter: blur(20px); /* Increased blur for stronger glass effect */
+        -webkit-backdrop-filter: blur(20px); /* Safari support */
+        border: 1px solid rgba(255, 255, 255, 0.6); /* More prominent white border for definition */
+        max-width: 600px; /* Max width for the container */
+        width: 90%; /* Responsive width */
+        position: relative;
+        transition: box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out; /* Smooth transition for uplift */
+    }
 
-    @* Form for confirming deletion. Posts to the DeleteConfirmed action. *@
-    <form asp-action="Delete" class="mt-3">
-        @* Added margin-top to form *@
-        @* Hidden field to pass the EmployeeId to the DeleteConfirmed action *@
-        <input type="hidden" asp-for="EmployeeId" />
-        @* Use Bootstrap button classes *@
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        @* Link back to the Employee Index page *@
-        <a asp-action="Index">Back to List</a>
-    </form>
+        .form-container:hover {
+            box-shadow: 0 1.2rem 4rem rgba(0, 0, 0, 0.15); /* More pronounced shadow on hover */
+            transform: translateY(-5px); /* Slight uplift effect on hover */
+        }
+
+    /* Heading styling for prominence and clarity */
+    h1 {
+        color: #2C3E50; /* Deep, dark blue/charcoal for a strong heading */
+        font-weight: 700; /* Bolder font for significant emphasis */
+        border-bottom: 1px solid rgba(224, 230, 233, 0.5); /* Very subtle, slightly translucent bottom border */
+        padding-bottom: 1rem; /* Generous space below the border */
+        margin-bottom: 2rem; /* More space below the heading */
+    }
+
+    h3 { /* For "Are you sure you want to delete this?" */
+        color: #34495E;
+        margin-bottom: 1.5rem;
+    }
+
+    h4 { /* For "Employee" sub-heading */
+        color: #34495E; /* Dark gray for sub-heading */
+        margin-bottom: 1.5rem;
+    }
+
+    /* Definition list styling */
+    dl.row {
+        margin-bottom: 2rem; /* Space below the definition list */
+    }
+
+        dl.row dt {
+            font-weight: 600; /* Bolder labels */
+            color: #34495E; /* Darker label color */
+            padding-right: 1rem; /* Space between label and value */
+        }
+
+        dl.row dd {
+            margin-bottom: 0.5rem; /* Space between definition terms */
+            word-wrap: break-word; /* Ensure text wraps within cells */
+            overflow-wrap: break-word; /* Ensure text wraps within cells */
+            padding-left: 0.75rem; /* Added padding to the left of values */
+            /* Glass morphism for display fields */
+            background-color: rgba(255, 255, 255, 0.15); /* Translucent white background */
+            backdrop-filter: blur(10px); /* Apply blur */
+            -webkit-backdrop-filter: blur(10px); /* Safari support */
+            border: 1px solid rgba(255, 255, 255, 0.6); /* Prominent white border */
+            border-radius: 0.5rem; /* Match input field rounded corners */
+            min-height: 2.5rem; /* Ensure consistent height for display fields */
+            display: flex; /* Use flex to align content vertically */
+            align-items: center; /* Center content vertically */
+        }
+
+    /* Button styling for a modern, interactive feel */
+    .btn {
+        border-radius: 0.6rem; /* Rounded corners for individual buttons */
+        padding: 0.5rem 1rem; /* Reduced padding for smaller buttons */
+        font-weight: 500; /* Medium font weight for text */
+        text-transform: uppercase; /* Uppercase text for a professional touch */
+        box-shadow: 0 0.25rem 0.6rem rgba(0, 0, 0, 0.1); /* Subtle shadow for buttons */
+        font-size: 0.75rem; /* Reduced font size for smaller buttons */
+        position: relative; /* Needed for pseudo-element positioning */
+        overflow: hidden; /* To clip the pseudo-element */
+        z-index: 1; /* Ensure text is above pseudo-element */
+        transition: color 0.3s ease, transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease; /* Only text color transition */
+        background-color: transparent; /* Start with transparent background */
+    }
+
+        /* Pseudo-element for the water spilling effect */
+        .btn::before { /* Apply to all buttons with .btn */
+            content: '';
+            position: absolute;
+            bottom: 0; /* Start from the bottom */
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 0.6rem; /* Match button border-radius */
+            z-index: -1; /* Behind the button text */
+            transform: scaleY(0); /* Start hidden at the bottom */
+            transform-origin: bottom; /* Animate from bottom up */
+            transition: transform 0.3s ease-out; /* Animation for the fill */
+        }
+
+        .btn:hover::before {
+            transform: scaleY(1); /* Fill up on hover */
+        }
+
+        .btn:hover {
+            transform: translateY(-2px); /* Slight lift on hover */
+            box-shadow: 0 0.4rem 0.8rem rgba(0, 0, 0, 0.15); /* More pronounced shadow on hover */
+            color: white; /* Text turns white on hover */
+        }
+
+    /* Specific button color adjustments for a palette */
+    .btn-primary { /* Not used in this specific page, but defined for consistency */
+        border: 1px solid #007bff; /* A standard, professional blue outline */
+        color: #007bff; /* Text color matches outline */
+    }
+
+        .btn-primary::before {
+            background-color: #0056b3; /* Darker blue fill color for primary button on hover */
+        }
+
+        .btn-primary:hover {
+            border-color: #0056b3; /* Darker blue outline on hover */
+        }
+
+    .btn-danger {
+        border: 1px solid #E74C3C; /* Alizarin red outline */
+        color: #E74C3C; /* Text color matches outline */
+    }
+
+        .btn-danger::before {
+            background-color: #C0392B; /* Darker red fill color for danger button on hover */
+        }
+
+        .btn-danger:hover {
+            border-color: #C0392B; /* Darker red outline on hover */
+        }
+
+    /* Back to List link styling */
+    .back-to-list {
+        margin-left: 1rem; /* Space from the delete button */
+        font-size: 0.9rem; /* Slightly smaller font for the link */
+        color: #007bff; /* Match primary button color */
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+        .back-to-list:hover {
+            color: #0056b3; /* Darker blue on hover */
+            text-decoration: underline;
+        }
+</style>
+
+<div class="form-container">
+    <h1 class="mb-4 text-danger">Delete Employee</h1> @* Highlight delete heading in danger color *@
+
+    <h3 class="mb-3">Are you sure you want to delete this?</h3> @* Added margin-bottom *@
+
+    <div>
+        <h4>Employee</h4>
+        <hr />
+        @* Use Bootstrap row and column for layout and display classes *@
+        <dl class="row">
+            @* Use dl, dt, dd with row/col for definition list layout *@
+            @* Displaying properties of the Employee to be deleted *@
+            <dt class="col-sm-3">
+                @* Use column for label *@
+                @Html.DisplayNameFor(model => model.Name)
+            </dt>
+            <dd class="col-sm-9">
+                @* Use column for value *@
+                @Html.DisplayFor(model => model.Name)
+            </dd>
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.Email)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.Email)
+            </dd>
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.Phone)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.Phone)
+            </dd>
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.Address)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.Address)
+            </dd>
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.Designation)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.Designation)
+            </dd>
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.Organization)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.Organization.OrganizationName)
+            </dd>
+        </dl>
+
+        @* Form for confirming deletion. Posts to the DeleteConfirmed action. *@
+        <form asp-action="Delete" class="mt-3">
+            @* Added margin-top to form *@
+            @* Hidden field to pass the EmployeeId to the DeleteConfirmed action *@
+            <input type="hidden" asp-for="EmployeeId" />
+            @* Use Bootstrap button classes *@
+            <input type="submit" value="Delete" class="btn btn-danger" />
+            @* Link back to the Employee Index page *@
+            <a asp-action="Index" class="back-to-list">Back to List</a>
+        </form>
+    </div>
 </div>
 
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

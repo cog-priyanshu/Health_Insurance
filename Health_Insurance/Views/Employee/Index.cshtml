@@ -5,72 +5,303 @@
     ViewData["Title"] = "Employee List";
 }
 
-@* Use Bootstrap heading and margin utility *@
-<h1 class="mb-4">Employee List</h1>
 
-@* Use Bootstrap button class and margin utility *@
-<p>
-    <a asp-action="Create" class="btn btn-primary mb-3">Create New</a>
-</p>
+<!--almost done working-->
 
-@* Apply Bootstrap table classes for styling *@
-<table class="table table-striped table-bordered table-hover">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Email)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Phone)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Designation)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Organization)
-            </th>
-            <th></th> @* Column for action links (Edit, Details, Delete) *@
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Name)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Email)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Phone)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Designation)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Organization.OrganizationName)
-                </td>
-                <td>
-                    @* Apply Bootstrap button classes to links *@
-                    <a asp-action="Edit" asp-route-id="@item.EmployeeId" class="btn btn-sm btn-info">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.EmployeeId" class="btn btn-sm btn-secondary">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.EmployeeId" class="btn btn-sm btn-danger">Delete</a>
-                </td>
-            </tr>
+<style>
+    /* Custom styles for professional aesthetics and subtle animations */
+
+    /* General body styling for a clean, light background with aurora effect */
+    body {
+        /* Aurora-like background with light, ethereal shades - professional color combination */
+        background: radial-gradient(at 20% 80%, rgba(150, 200, 255, 0.7) 0%, transparent 55%), /* Brighter Light Blue */
+        radial-gradient(at 80% 20%, rgba(200, 180, 230, 0.7) 0%, transparent 55%), /* Subtle Lavender/Purple */
+        radial-gradient(at 50% 50%, rgba(180, 255, 200, 0.7) 0%, transparent 65%); /* Brighter Light Mint Green */
+        background-color: #EBF3F8; /* A slightly deeper light blue fallback */
+        font-family: 'Inter', sans-serif; /* Modern and clean font */
+        color: #34495E; /* Dark gray for general text for good readability */
+        min-height: 100vh; /* Ensure body takes full viewport height */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        overflow-x: hidden; /* Prevent horizontal scroll */
+        position: relative; /* For background positioning */
+    }
+
+    /* Container styling for a sophisticated card-like appearance */
+    .employee-list-container {
+        background-color: rgba(255, 255, 255, 0.2); /* More translucent white for a pronounced glass effect */
+        padding: 3rem; /* Increased padding for a more spacious feel */
+        border-radius: 1.25rem; /* Even larger rounded corners for a softer, premium look */
+        box-shadow: 0 0.75rem 2.5rem rgba(0, 0, 0, 0.1); /* Softer, deeper shadow for elegant depth */
+        margin-top: 2.5rem; /* More space from the top */
+        margin-bottom: 2.5rem; /* More space from the bottom */
+        animation: fadeIn 0.8s ease-out forwards; /* Apply the fade-in animation */
+        backdrop-filter: blur(20px); /* Increased blur for stronger glass effect */
+        -webkit-backdrop-filter: blur(20px); /* Safari support */
+        border: 1px solid rgba(255, 255, 255, 0.6); /* More prominent white border for definition */
+    }
+
+    /* Heading styling for prominence and clarity */
+    h1 {
+        color: #2C3E50; /* Deep, dark blue/charcoal for a strong heading */
+        font-weight: 700; /* Bolder font for significant emphasis */
+        border-bottom: 1px solid rgba(224, 230, 233, 0.5); /* Very subtle, slightly translucent bottom border */
+        padding-bottom: 1rem; /* Generous space below the border */
+        margin-bottom: 2rem; /* More space below the heading */
+    }
+
+    /* Table styling for a refined data presentation */
+    .table {
+        border-radius: 1rem; /* Rounded corners for the entire table */
+        overflow: hidden; /* Ensures rounded corners are applied correctly */
+        margin-top: 2rem; /* Ample space above the table */
+        box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.08); /* Subtle shadow for the table */
+        border-collapse: separate; /* Required for border-radius on table */
+        border-spacing: 0; /* Remove spacing between cells */
+        background-color: rgba(255, 255, 255, 0.3); /* Slightly more opaque for differentiation */
+        backdrop-filter: blur(10px); /* Different blur value for differentiation */
+        -webkit-backdrop-filter: blur(10px); /* Safari support */
+        border: 1px solid rgba(255, 255, 255, 0.4); /* Slightly more prominent border */
+        table-layout: fixed; /* Ensures column widths are respected and content wraps */
+    }
+
+        .table thead th {
+            background-color: rgba(44, 62, 80, 0.85); /* Slightly translucent deep blue/charcoal for header */
+            color: white; /* Crisp white text for high contrast */
+            font-weight: 600; /* Bolder header text for readability */
+            vertical-align: middle; /* Center align text vertically */
+            padding: 1.2rem 1.5rem; /* More padding in header cells for spaciousness */
+            border-bottom: none; /* Remove default border-bottom */
+            text-align: left; /* Align header text to the left */
         }
-    </tbody>
-</table>
 
-@* Display error message with Bootstrap alert classes *@
-@if (ViewBag.ErrorMessage != null)
-{
-    <div class="alert alert-danger mt-3">
-        @ViewBag.ErrorMessage
+            /* Column widths for responsiveness and to prevent horizontal scroll on full screen */
+            .table thead th:nth-child(1) {
+                width: 14%;
+            }
+            /* Name */
+            .table thead th:nth-child(2) {
+                width: 16%;
+            }
+            /* Email */
+            .table thead th:nth-child(3) {
+                width: 10%;
+            }
+            /* Phone */
+            .table thead th:nth-child(4) {
+                width: 15%;
+            }
+            /* Designation */
+            .table thead th:nth-child(5) {
+                width: 17%;
+            }
+            /* Organization - Reduced width */
+            .table thead th:nth-child(6) {
+                width: 28%;
+            }
+        /* Actions - Increased width to compensate */
+
+
+        .table tbody tr {
+            transition: all 0.3s ease-in-out; /* Smooth transition for all properties on row hover */
+        }
+
+            .table tbody tr:hover {
+                background-color: rgba(236, 240, 241, 0.5); /* Adjusted translucency for hover */
+                transform: translateY(-3px); /* Slightly more pronounced lift effect on hover */
+                box-shadow: 0 0.4rem 1rem rgba(0, 0, 0, 0.06); /* Enhanced shadow on hover */
+            }
+
+        .table tbody td {
+            vertical-align: middle; /* Center align text vertically in body cells */
+            padding: 1rem 1.5rem; /* Consistent and generous padding for body cells */
+            border-top: 1px solid rgba(224, 230, 233, 0.5); /* Subtle translucent top border for row separation */
+        }
+
+    /* Button styling for a modern, interactive feel */
+    .btn {
+        border-radius: 0.6rem; /* Rounded corners for individual buttons */
+        padding: 0.5rem 1rem; /* Reduced padding for smaller buttons */
+        font-weight: 500; /* Medium font weight for text */
+        text-transform: uppercase; /* Uppercase text for a professional touch */
+        box-shadow: 0 0.25rem 0.6rem rgba(0, 0, 0, 0.1); /* Subtle shadow for buttons */
+        font-size: 0.75rem; /* Reduced font size for smaller buttons */
+        position: relative; /* Needed for pseudo-element positioning */
+        overflow: hidden; /* To clip the pseudo-element */
+        z-index: 1; /* Ensure text is above pseudo-element */
+        transition: color 0.3s ease, transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease; /* Only text color transition */
+        background-color: transparent; /* Start with transparent background */
+    }
+
+        /* Pseudo-element for the water spilling effect */
+        .btn::before { /* Apply to all buttons with .btn */
+            content: '';
+            position: absolute;
+            bottom: 0; /* Start from the bottom */
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 0.6rem; /* Match button border-radius */
+            z-index: -1; /* Behind the button text */
+            transform: scaleY(0); /* Start hidden at the bottom */
+            transform-origin: bottom; /* Animate from bottom up */
+            transition: transform 0.3s ease-out; /* Animation for the fill */
+        }
+
+        .btn:hover::before {
+            transform: scaleY(1); /* Fill up on hover */
+        }
+
+        .btn:hover {
+            transform: translateY(-2px); /* Slight lift on hover */
+            box-shadow: 0 0.4rem 0.8rem rgba(0, 0, 0, 0.15); /* More pronounced shadow on hover */
+            color: white; /* Text turns white on hover */
+        }
+
+    /* New flex container for action buttons to form a cohesive group */
+    .action-buttons-group {
+        display: flex; /* Use flexbox to arrange buttons horizontally */
+        flex-wrap: nowrap; /* Prevent buttons from wrapping to the next line */
+        gap: 0.4rem; /* Reduced gap between buttons for distinct appearance */
+        justify-content: flex-start; /* Align buttons to the start of the container */
+    }
+
+    /* Specific button color adjustments for a professional palette */
+    .btn-primary {
+        background-color: #3498DB; /* Vibrant blue for primary actions */
+        border-color: #3498DB;
+        color: white; /* Primary button is always filled */
+    }
+
+        .btn-primary:hover {
+            background-color: #217DBB; /* Darker blue on hover */
+            border-color: #217DBB;
+        }
+
+    .btn-info {
+        border: 1px solid #2ECC71; /* Emerald green outline */
+        color: #2ECC71; /* Text color matches outline */
+    }
+
+        .btn-info::before {
+            background-color: #2ECC71; /* Fill color for info button */
+        }
+
+    .btn-secondary {
+        border: 1px solid #95A5A6; /* Concrete gray outline */
+        color: #95A5A6; /* Text color matches outline */
+    }
+
+        .btn-secondary::before {
+            background-color: #95A5A6; /* Fill color for secondary button */
+        }
+
+    .btn-danger {
+        border: 1px solid #E74C3C; /* Alizarin red outline */
+        color: #E74C3C; /* Text color matches outline */
+    }
+
+        .btn-danger::before {
+            background-color: #E74C3C; /* Fill color for danger button */
+        }
+
+    /* Error message styling */
+    .alert-danger {
+        border-radius: 0.6rem; /* Rounded corners for the alert box */
+        font-weight: 500; /* Medium font weight */
+        background-color: #FEECEB; /* Lighter red background for alert */
+        color: #C0392B; /* Darker red text for alert */
+        border-color: #E74C3C; /* Red border for alert */
+        padding: 1rem 1.5rem; /* More padding for alerts */
+    }
+
+    /* Fade-in animation for the main content container */
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(25px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<div class="container employee-list-container">
+    @* Use Bootstrap heading and margin utility, and add text-center for alignment *@
+    <h1 class="text-center">Employee List</h1>
+
+    @* Use Bootstrap button class and margin utility *@
+    <p>
+        <a asp-action="Create" class="btn btn-primary mb-3">Create New Employee</a>
+    </p>
+
+    @* Add table-responsive for better mobile viewing *@
+    <div class="table-responsive">
+        @* Apply Bootstrap table classes for styling *@
+        <table class="table table-striped table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Name)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Email)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Phone)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Designation)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Organization)
+                    </th>
+                    <th></th> @* Column for action links (Edit, Details, Delete) *@
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Name)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Email)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Phone)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Designation)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Organization.OrganizationName)
+                        </td>
+                        <td>
+                            @* Wrap action buttons in a flex container for horizontal alignment *@
+                            <div class="action-buttons-group">
+                                <a asp-action="Edit" asp-route-id="@item.EmployeeId" class="btn btn-sm btn-info">Edit</a>
+                                <a asp-action="Details" asp-route-id="@item.EmployeeId" class="btn btn-sm btn-secondary">Details</a>
+                                <a asp-action="Delete" asp-route-id="@item.EmployeeId" class="btn btn-sm btn-danger">Delete</a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
     </div>
-}
 
-
+    @* Display error message with Bootstrap alert classes *@
+    @if (ViewBag.ErrorMessage != null)
+    {
+        <div class="alert alert-danger mt-3">
+            @ViewBag.ErrorMessage
+        </div>
+    }
+</div>

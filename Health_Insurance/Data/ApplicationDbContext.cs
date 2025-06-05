@@ -17,7 +17,7 @@ namespace Health_Insurance.Data // Ensure this namespace is correct for your Dat
         // DbSet properties represent collections of entities that can be queried from the database.
         // These will map to your database tables.
         public DbSet<Employee> Employees { get; set; }
-        public DbSet<Organization> Organizations { get; set; }
+        public DbSet<Organizations> Organizations { get; set; }
         public DbSet<Policy> Policies { get; set; }
         public DbSet<Enrollment> Enrollments { get; set; }
 

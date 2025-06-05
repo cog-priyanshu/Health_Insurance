@@ -33,7 +33,7 @@ namespace Health_Insurance.Models // Ensure this namespace is correct based on y
         // Navigation property to the related Organization
         [ForeignKey("OrganizationId")] // Specifies the foreign key property
         [BindNever] // Add this attribute to prevent model binding for this property
-        public virtual Organization Organization { get; set; }
+        public virtual Organizations Organization { get; set; }
 
         // --- Authentication Fields for Employee Login ---
         [Required]

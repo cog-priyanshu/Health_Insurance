@@ -7,125 +7,308 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Health_Insurance.styles.css" asp-append-version="true" />
+    <style>
+        /* Custom styles for professional aesthetics and subtle animations */
+
+        /* General body styling for a clean, light background with aurora effect */
+        body {
+            /* Aurora-like background with light, ethereal shades - professional color combination */
+            background: radial-gradient(at 20% 80%, rgba(150, 200, 255, 0.7) 0%, transparent 55%), /* Brighter Light Blue */
+                        radial-gradient(at 80% 20%, rgba(200, 180, 230, 0.7) 0%, transparent 55%), /* Subtle Lavender/Purple */
+                        radial-gradient(at 50% 50%, rgba(180, 255, 200, 0.7) 0%, transparent 65%); /* Brighter Light Mint Green */
+            background-color: #EBF3F8; /* A slightly deeper light blue fallback */
+            font-family: 'Inter', sans-serif; /* Modern and clean font */
+            color: #34495E; /* Dark gray for general text for good readability */
+            min-height: 100vh; /* Ensure body takes full viewport height */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; /* Align content to top initially */
+            overflow-x: hidden; /* Prevent horizontal scroll */
+            position: relative; /* For background positioning */
+            padding-top: 70px; /* Adjust based on your navbar's height to prevent overlap */
+        }
+
+        /* Fixed Header (Navbar) Styling with Glass Morphism */
+        header .navbar {
+            position: fixed; /* Make the navbar fixed at the top */
+            top: 0; /* Align to the top of the viewport */
+            left: 0; /* Align to the left of the viewport */
+            width: 100%; /* Take full width of the viewport */
+            z-index: 1030; /* Ensure it stays above other content (Bootstrap's default navbar z-index is 1030) */
+            background-color: rgba(173, 216, 230, 0.4); /* Light pastel blue, increased transparency for better blend */
+            backdrop-filter: blur(10px); /* Apply blur effect */
+            -webkit-backdrop-filter: blur(10px); /* Safari support for blur */
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5); /* Softened white border for better blend */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03); /* Softer shadow for depth */
+            transition: background-color 0.3s ease, box-shadow 0.3s ease; /* Smooth transitions */
+            border-radius: 0; /* Remove rounded corners if present from other styles */
+            padding-left: 1rem; /* Added internal padding for a better look */
+            padding-right: 1rem; /* Added internal padding for a better look */
+        }
+
+        /* Adjust main content padding to prevent overlap with fixed header/footer */
+        .container {
+            padding-top: 70px; /* Adjust based on your navbar's height */
+            /* Removed padding-bottom as footer is removed */
+        }
+
+        /* Navbar Brand Styling */
+        .navbar-brand {
+            color: #2C3E50 !important; /* Deep, dark blue/charcoal for prominence */
+            font-weight: 700 !important; /* Bolder font */
+            font-size: 1.5rem !important; /* Larger font size */
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+            .navbar-brand:hover {
+                transform: scale(1.02); /* Slight scale on hover */
+                color: #0056b3 !important; /* Darker blue on hover */
+            }
+
+        /* Navbar Navigation Links Styling */
+        .navbar-nav .nav-link {
+            color: #34495E !important; /* Changed to darker color for better visibility */
+            font-weight: 500;
+            position: relative;
+            padding: 0.5rem 0.8rem !important; /* Adjusted padding for better fit */
+            border-radius: 9999px; /* Highly rounded, pill-like */
+            transition: all 0.3s ease-in-out; /* Smooth transitions for all properties */
+            white-space: nowrap; /* Ensures text appears on a single line */
+            font-size: 0.9rem; /* Adjusted font size for better fit */
+        }
+
+            .navbar-nav .nav-link:hover {
+                background-color: rgba(255, 255, 255, 0.2); /* Subtle translucent background on hover */
+                color: #2C3E50 !important; /* Darker text on hover for contrast */
+                transform: translateY(-2px); /* Slight lift on hover */
+            }
+
+            .navbar-nav .nav-link.active {
+                background-color: rgba(150, 200, 255, 0.3); /* Translucent light blue background for active, matching aurora */
+                backdrop-filter: blur(10px); /* Glass morphism blur for active state */
+                -webkit-backdrop-filter: blur(10px); /* Safari support */
+                border: 1px solid rgba(255, 255, 255, 0.6); /* Subtle border for active state */
+                color: #2C3E50 !important; /* Darker text for active to stand out on light background */
+                box-shadow: 0 4px 10px rgba(150, 200, 255, 0.4); /* Shadow for active pill, matching aurora */
+                transform: translateY(-2px); /* Maintain lift */
+                font-weight: 600; /* Bolder font for active */
+            }
+
+        /* Special handling for the Logout button which uses btn-link */
+        .navbar-nav .btn-link.nav-link {
+            border: none; /* Remove button borders */
+            box-shadow: none; /* Remove button shadows */
+            background-color: transparent; /* Ensure background is transparent */
+            padding: 0.5rem 0.8rem !important; /* Adjusted padding to match nav-link */
+            font-size: 0.9rem; /* Match nav-link font size */
+            text-transform: none; /* Keep original casing for username */
+            white-space: nowrap; /* Prevent wrapping */
+            color: #34495E !important; /* Changed to darker color for better visibility */
+            transition: all 0.3s ease-in-out;
+            border-radius: 9999px; /* Apply pill shape */
+        }
+
+            .navbar-nav .btn-link.nav-link:hover {
+                text-decoration: none; /* No underline */
+                color: white !important; /* White text for logout on hover */
+                transform: translateY(-2px); /* Maintain lift */
+                background-color: #E74C3C; /* Red solid background on hover */
+                box-shadow: 0 4px 10px rgba(231, 76, 60, 0.4); /* Shadow for hover pill */
+            }
+
+        /* General button styling adjustments if needed for consistent look (these are outside navbar) */
+        .btn {
+            border-radius: 0.6rem;
+            padding: 0.5rem 1rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            box-shadow: 0 0.25rem 0.6rem rgba(0, 0, 0, 0.1);
+            font-size: 0.75rem;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            transition: color 0.3s ease, transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease;
+            background-color: transparent;
+        }
+
+            .btn::before {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                border-radius: 0.6rem;
+                z-index: -1;
+                transform: scaleY(0);
+                transform-origin: bottom;
+                transition: transform 0.3s ease-out;
+            }
+
+            .btn:hover::before {
+                transform: scaleY(1);
+            }
+
+            .btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 0.4rem 0.8rem rgba(0, 0, 0, 0.15);
+                color: white;
+            }
+
+        .btn-primary {
+            border: 1px solid #007bff;
+            color: #007bff;
+        }
+
+            .btn-primary::before {
+                background-color: #0056b3;
+            }
+
+            .btn-primary:hover {
+                border-color: #0056b3;
+            }
+
+        .btn-success {
+            border: 1px solid #28a745;
+            color: #28a745;
+        }
+
+            .btn-success::before {
+                background-color: #218838;
+            }
+
+            .btn-success:hover {
+                border-color: #218838;
+            }
+    </style>
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Health_Insurance</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
 
-                        @* --- Conditional Navigation Links based on Authentication and Role --- *@
+    @* Exclude navbar and footer on Login Page *@
+    @if (!ViewData["Title"].ToString().Contains("Login"))
+    {
+        <header>
+            <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+                <div class="container-fluid">
+                    <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Health_Insurance</a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                            aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                        <ul class="navbar-nav flex-grow-1">
+                            @{
+                                string currentController = ViewContext.RouteData.Values["Controller"]?.ToString();
+                                string currentAction = ViewContext.RouteData.Values["Action"]?.ToString();
 
-                        @* If the user is authenticated (logged in) *@
-                        @if (User.Identity.IsAuthenticated)
-                        {
-                            @* Links visible to ALL authenticated users *@
+                                Func<string, string, string> GetNavLinkClass = (controller, action) =>
+                                {
+                                    return (currentController == controller && currentAction == action) ? "nav-link active" : "nav-link";
+                                };
+                            }
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="PremiumCalculator" asp-action="CalculatePremium">Premium Calculator</a>
+                                <a class="@GetNavLinkClass("Home", "Index")" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="@GetNavLinkClass("Home", "Privacy")" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                             </li>
 
-                            @* Links visible ONLY to Admin users *@
-                            @if (User.IsInRole("Admin"))
+                            @* --- Conditional Navigation Links based on Authentication and Role --- *@
+
+                            @* If the user is authenticated (logged in) *@
+                            @if (User.Identity.IsAuthenticated)
                             {
+                                @* Links visible to ALL authenticated users *@
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Employee" asp-action="Index">Employees</a>
+                                    <a class="@GetNavLinkClass("PremiumCalculator", "CalculatePremium")" asp-area="" asp-controller="PremiumCalculator" asp-action="CalculatePremium">Premium Calculator</a>
                                 </li>
+
+                                @* Links visible ONLY to Admin users *@
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <li class="nav-item">
+                                        <a class="@GetNavLinkClass("Employee", "Index")" asp-area="" asp-controller="Employee" asp-action="Index">Employees</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="@GetNavLinkClass("Organization", "Index")" asp-area="" asp-controller="Organization" asp-action="Index">Organizations</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="@GetNavLinkClass("Policies", "Index")" asp-area="" asp-controller="Policies" asp-action="Index">Policies</a> @* Corrected Controller Name *@
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="@GetNavLinkClass("Enrollment", "Index")" asp-area="" asp-controller="Enrollment" asp-action="Index">Enrollments (Admin)</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="@GetNavLinkClass("Claim", "ListAllClaims")" asp-area="" asp-controller="Claim" asp-action="ListAllClaims">Claims (Admin)</a>
+                                    </li>
+                                }
+
+                                @* Links visible ONLY to Employee users *@
+                                @if (User.IsInRole("Employee"))
+                                {
+                                    // Declare variables here once, accessible throughout this entire 'if' block
+                                    System.Security.Claims.Claim employeeIdClaim = User.FindFirst("EmployeeId");
+                                    int employeeId = 0; // Initialize with a default value
+
+                                    <li class="nav-item">
+                                        @if (employeeIdClaim != null && int.TryParse(employeeIdClaim.Value, out employeeId))
+                                        {
+                                            <a class="@GetNavLinkClass("Enrollment", "EnrolledPolicies")" asp-area="" asp-controller="Enrollment" asp-action="EnrolledPolicies" asp-route-employeeId="@employeeId">My Enrollments</a>
+                                        }
+                                        else
+                                        {
+                                            <a class="nav-link" href="#">My Enrollments (Login Required)</a> @* Fallback if EmployeeId not found in claims *@
+                                        }
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="@GetNavLinkClass("Claim", "SubmitClaim")" asp-area="" asp-controller="Claim" asp-action="SubmitClaim">Submit Claim</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        @if (employeeIdClaim != null && int.TryParse(employeeIdClaim.Value, out employeeId))
+                                        {
+                                            <a class="@GetNavLinkClass("Claim", "ListAllClaims")" asp-area="" asp-controller="Claim" asp-action="ListAllClaims" asp-route-employeeId="@employeeId">My Claims</a>
+                                        }
+                                        else
+                                        {
+                                            <a class="nav-link" href="#">My Claims (Login Required)</a> @* Fallback if EmployeeId not found in claims *@
+                                        }
+                                    </li>
+                                }
+
+                                @* Logout link for all authenticated users *@
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Organization" asp-action="Index">Organizations</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Policies" asp-action="Index">Policies</a> @* Corrected Controller Name *@
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Enrollment" asp-action="Index">Enrollments (Admin)</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Claim" asp-action="ListAllClaims">Claims (Admin)</a>
+                                    <form asp-controller="Account" asp-action="Logout" method="get" class="form-inline">
+                                        <button type="submit" class="nav-link btn btn-link">Logout (@User.Identity.Name)</button>
+                                    </form>
                                 </li>
                             }
-
-                            @* Links visible ONLY to Employee users *@
-                            @if (User.IsInRole("Employee"))
+                            else // If the user is NOT authenticated (not logged in)
                             {
-                                // Declare variables here once, accessible throughout this entire 'if' block
-                                System.Security.Claims.Claim employeeIdClaim = User.FindFirst("EmployeeId");
-                                int employeeId = 0; // Initialize with a default value
-
                                 <li class="nav-item">
-                                    @if (employeeIdClaim != null && int.TryParse(employeeIdClaim.Value, out employeeId))
-                                    {
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="Enrollment" asp-action="EnrolledPolicies" asp-route-employeeId="@employeeId">My Enrollments</a>
-                                    }
-                                    else
-                                    {
-                                        <a class="nav-link text-dark" href="#">My Enrollments (Login Required)</a> @* Fallback if EmployeeId not found in claims *@
-                                    }
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Claim" asp-action="SubmitClaim">Submit Claim</a>
-                                </li>
-                                <li class="nav-item">
-                                    @if (employeeIdClaim != null && int.TryParse(employeeIdClaim.Value, out employeeId))
-                                    {
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="Claim" asp-action="ListAllClaims" asp-route-employeeId="@employeeId">My Claims</a>
-                                    }
-                                    else
-                                    {
-                                        <a class="nav-link text-dark" href="#">My Claims (Login Required)</a> @* Fallback if EmployeeId not found in claims *@
-                                    }
+                                    <a class="@GetNavLinkClass("Account", "Login")" asp-area="" asp-controller="Account" asp-action="Login">Login</a>
                                 </li>
                             }
+                            @* --- End Conditional Navigation Links --- *@
 
-                            @* Logout link for all authenticated users *@
-                            <li class="nav-item">
-                                <form asp-controller="Account" asp-action="Logout" method="get" class="form-inline">
-                                    <button type="submit" class="nav-link btn btn-link text-dark">Logout (@User.Identity.Name)</button>
-                                </form>
-                            </li>
-                        }
-                        else // If the user is NOT authenticated (not logged in)
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Login">Login</a>
-                            </li>
-                        }
-                        @* --- End Conditional Navigation Links --- *@
-
-                    </ul>
+                        </ul>
+                    </div>
                 </div>
-            </div>
-        </nav>
-    </header>
+            </nav>
+        </header>
+    }
+
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2024 - Health_Insurance - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
+    @* Removed the footer section as requested *@
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
-
-
-
-

@@ -5,81 +5,413 @@
     ViewData["Title"] = "Your Enrolled Policies";
 }
 
-@* Use Bootstrap heading and margin utility *@
-<h1 class="mb-4">Your Enrolled Policies</h1>
+<style>
+    /* Custom styles for professional aesthetics and subtle animations */
 
-@* Display Employee Name if available *@
-@if (ViewBag.EmployeeName != null)
-{
-    <h4 class="mb-3">Employee: @ViewBag.EmployeeName</h4> @* Added margin-bottom *@
-}
+    /* General body styling for a clean, light background with aurora effect */
+    body {
+        /* Aurora-like background with light, ethereal shades - professional color combination */
+        background: radial-gradient(at 20% 80%, rgba(150, 200, 255, 0.7) 0%, transparent 55%), /* Brighter Light Blue */
+        radial-gradient(at 80% 20%, rgba(200, 180, 230, 0.7) 0%, transparent 55%), /* Subtle Lavender/Purple */
+        radial-gradient(at 50% 50%, rgba(180, 255, 200, 0.7) 0%, transparent 65%); /* Brighter Light Mint Green */
+        background-color: #EBF3F8; /* A slightly deeper light blue fallback */
+        font-family: 'Inter', sans-serif; /* Modern and clean font */
+        color: #34495E; /* Dark gray for general text for good readability */
+        min-height: 100vh; /* Ensure body takes full viewport height */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start; /* Align content to top for list view */
+        overflow-x: hidden; /* Prevent horizontal scroll */
+        position: relative; /* For background positioning */
+        padding-top: 2.5rem; /* Add some top padding */
+        padding-bottom: 2.5rem; /* Add some bottom padding */
+    }
 
+    /* Container styling for a sophisticated card-like appearance (for the whole list/table) */
+    .list-container { /* Renamed from form-container for clarity in list views */
+        background-color: rgba(255, 255, 255, 0.2); /* More translucent white for a pronounced glass effect */
+        padding: 3rem; /* Increased padding for a more spacious feel */
+        border-radius: 1.25rem; /* Even larger rounded corners for a softer, premium look */
+        box-shadow: 0 0.75rem 2.5rem rgba(0, 0, 0, 0.1); /* Softer, deeper shadow for elegant depth */
+        margin: 2.5rem auto; /* Center horizontally and provide vertical margin */
+        backdrop-filter: blur(20px); /* Increased blur for stronger glass effect */
+        -webkit-backdrop-filter: blur(20px); /* Safari support */
+        border: 1px solid rgba(255, 255, 255, 0.6); /* More prominent white border for definition */
+        max-width: 1000px; /* Max width for the table container */
+        width: 90%; /* Responsive width */
+        position: relative;
+        transition: box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out; /* Smooth transition for uplift */
+    }
 
-@* Apply Bootstrap table classes for styling *@
-<table class="table table-striped table-bordered table-hover">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Policy.PolicyName) @* Display Policy Name from the related Policy *@
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Policy.CoverageAmount) @* Display Coverage Amount from the related Policy *@
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.EnrollmentDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Status)
-            </th>
-            <th></th> @* Column for action links (Cancel) *@
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Policy.PolicyName)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Policy.CoverageAmount)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.EnrollmentDate)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Status)
-                </td>
-                <td>
-                    @* Form for cancelling enrollment with Bootstrap button class *@
-                    @* Need to pass EnrollmentId and EmployeeId for redirection *@
-                    <form asp-action="CancelEnrollment" method="post">
-                        <input type="hidden" name="enrollmentId" value="@item.EnrollmentId" />
-                        <input type="hidden" name="employeeId" value="@item.EmployeeId" /> @* Pass EmployeeId for redirection *@
-                        @* Use Bootstrap button class and confirm dialog *@
-                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to cancel this enrollment?');">Cancel</button>
-                        @* Add CSRF token *@
-                        @Html.AntiForgeryToken()
-                    </form>
-                </td>
-            </tr>
+        .list-container:hover {
+            box-shadow: 0 1.2rem 4rem rgba(0, 0, 0, 0.15); /* More pronounced shadow on hover */
+            transform: translateY(-5px); /* Slight uplift effect on hover */
         }
-    </tbody>
-</table>
 
-@* Display error message with Bootstrap alert classes *@
-@if (ViewBag.ErrorMessage != null)
-{
-    <div class="alert alert-danger mt-3">
-        @ViewBag.ErrorMessage
+    /* Heading styling for prominence and clarity */
+    h1 {
+        color: #2C3E50; /* Deep, dark blue/charcoal for a strong heading */
+        font-weight: 700; /* Bolder font for significant emphasis */
+        border-bottom: 1px solid rgba(224, 230, 233, 0.5); /* Very subtle, slightly translucent bottom border */
+        padding-bottom: 1rem; /* Generous space below the border */
+        margin-bottom: 2rem; /* More space below the heading */
+    }
+
+    h4 { /* For employee name */
+        color: #34495E; /* Dark gray */
+        margin-bottom: 1.5rem;
+    }
+
+    /* Table styling for a refined data presentation */
+    .table {
+        border-radius: 1rem; /* Rounded corners for the entire table */
+        overflow: hidden; /* Ensures rounded corners are applied correctly */
+        margin-top: 2rem; /* Ample space above the table */
+        box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.08); /* Subtle shadow for the table */
+        border-collapse: separate; /* Required for border-radius on table */
+        border-spacing: 0; /* Remove spacing between cells */
+        background-color: rgba(255, 255, 255, 0.3); /* Slightly more opaque for differentiation */
+        backdrop-filter: blur(10px); /* Different blur value for differentiation */
+        -webkit-backdrop-filter: blur(10px); /* Safari support */
+        border: 1px solid rgba(255, 255, 255, 0.4); /* Slightly more prominent border */
+        table-layout: fixed; /* Ensures column widths are respected and content wraps */
+    }
+
+        .table thead th {
+            background-color: rgba(44, 62, 80, 0.85); /* Slightly translucent deep blue/charcoal for header */
+            color: white; /* Crisp white text for high contrast */
+            font-weight: 600; /* Bolder header text for readability */
+            vertical-align: middle; /* Center align text vertically */
+            padding: 1.2rem 1.5rem; /* More padding in header cells for spaciousness */
+            border-bottom: none; /* Remove default border-bottom */
+            text-align: left; /* Align header text to the left */
+        }
+
+            /* Column widths for responsiveness */
+            .table thead th:nth-child(1) {
+                width: 25%;
+            }
+            /* Policy Name */
+            .table thead th:nth-child(2) {
+                width: 20%;
+            }
+            /* Coverage Amount */
+            .table thead th:nth-child(3) {
+                width: 20%;
+            }
+            /* Enrollment Date */
+            .table thead th:nth-child(4) {
+                width: 15%;
+            }
+            /* Status */
+            .table thead th:nth-child(5) {
+                width: 20%;
+            }
+        /* Actions */
+
+
+        .table tbody tr {
+            transition: all 0.3s ease-in-out; /* Smooth transition for all properties on row hover */
+        }
+
+            .table tbody tr:hover {
+                background-color: rgba(236, 240, 241, 0.5); /* Adjusted translucency for hover */
+                transform: translateY(-3px); /* Slightly more pronounced lift effect on hover */
+                box-shadow: 0 0.4rem 1rem rgba(0, 0, 0, 0.06); /* Enhanced shadow on hover */
+            }
+
+        .table tbody td {
+            vertical-align: middle; /* Center align text vertically in body cells */
+            padding: 1rem 1.5rem; /* Consistent and generous padding for body cells */
+            border-top: 1px solid rgba(224, 230, 233, 0.5); /* Subtle translucent top border for row separation */
+            word-wrap: break-word; /* Ensure text wraps within cells */
+            overflow-wrap: break-word; /* Ensure text wraps within cells */
+        }
+
+            .table tbody td:last-child { /* Actions column */
+                text-align: center; /* Center align content in the actions column */
+            }
+
+    /* Button styling for a modern, interactive feel */
+    .btn {
+        border-radius: 0.6rem; /* Rounded corners for individual buttons */
+        padding: 0.5rem 1rem; /* Reduced padding for smaller buttons */
+        font-weight: 500; /* Medium font weight for text */
+        text-transform: uppercase; /* Uppercase text for a professional touch */
+        box-shadow: 0 0.25rem 0.6rem rgba(0, 0, 0, 0.1); /* Subtle shadow for buttons */
+        font-size: 0.75rem; /* Reduced font size for smaller buttons */
+        position: relative; /* Needed for pseudo-element positioning */
+        overflow: hidden; /* To clip the pseudo-element */
+        z-index: 1; /* Ensure text is above pseudo-element */
+        transition: color 0.3s ease, transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease; /* Only text color transition */
+        background-color: transparent; /* Start with transparent background */
+    }
+
+        /* Pseudo-element for the water spilling effect */
+        .btn::before { /* Apply to all buttons with .btn */
+            content: '';
+            position: absolute;
+            bottom: 0; /* Start from the bottom */
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 0.6rem; /* Match button border-radius */
+            z-index: -1; /* Behind the button text */
+            transform: scaleY(0); /* Start hidden at the bottom */
+            transform-origin: bottom; /* Animate from bottom up */
+            transition: transform 0.3s ease-out; /* Animation for the fill */
+        }
+
+        .btn:hover::before {
+            transform: scaleY(1); /* Fill up on hover */
+        }
+
+        .btn:hover {
+            transform: translateY(-2px); /* Slight lift on hover */
+            box-shadow: 0 0.4rem 0.8rem rgba(0, 0, 0, 0.15); /* More pronounced shadow on hover */
+            color: white; /* Text turns white on hover */
+        }
+
+    /* Specific button color adjustments for a palette */
+    .btn-primary { /* Not used here directly, but for consistency */
+        border: 1px solid #007bff; /* A standard, professional blue outline */
+        color: #007bff; /* Text color matches outline */
+    }
+
+        .btn-primary::before {
+            background-color: #0056b3; /* Darker blue fill color for primary button on hover */
+        }
+
+        .btn-primary:hover {
+            border-color: #0056b3; /* Darker blue outline on hover */
+        }
+
+    .btn-danger { /* Used for "Cancel" button */
+        border: 1px solid #E74C3C; /* Alizarin red outline */
+        color: #E74C3C; /* Text color matches outline */
+    }
+
+        .btn-danger::before {
+            background-color: #C0392B; /* Darker red fill color for danger button on hover */
+        }
+
+        .btn-danger:hover {
+            border-color: #C0392B; /* Darker red outline on hover */
+        }
+
+    /* Error message styling */
+    .alert-danger {
+        border-radius: 0.6rem; /* Rounded corners for the alert box */
+        font-weight: 500; /* Medium font weight */
+        background-color: #FEECEB; /* Lighter red background for alert */
+        color: #C0392B; /* Darker red text for alert */
+        border-color: #E74C3C; /* Red border for alert */
+        padding: 1rem 1.5rem; /* More padding for alerts */
+        margin-top: 1.5rem; /* Space from table */
+    }
+
+    /* Back to List link styling */
+    .back-to-list {
+        margin-top: 2rem;
+        font-size: 1rem;
+        color: #007bff; /* Match primary button color */
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+        .back-to-list:hover {
+            color: #0056b3; /* Darker blue on hover */
+            text-decoration: underline;
+        }
+
+    /* Custom Confirmation Modal */
+    .modal-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1050;
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+        pointer-events: none; /* Allows clicks to pass through when hidden */
+    }
+
+        .modal-backdrop.show {
+            opacity: 1;
+            pointer-events: auto; /* Enables clicks when visible */
+        }
+
+    .custom-modal {
+        background-color: rgba(255, 255, 255, 0.2); /* Glass effect for modal */
+        padding: 2rem;
+        border-radius: 1rem;
+        box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.2);
+        max-width: 400px;
+        width: 90%;
+        text-align: center;
+        transform: translateY(-50px);
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+        z-index: 1051;
+        backdrop-filter: blur(15px); /* Stronger blur for modal */
+        -webkit-backdrop-filter: blur(15px); /* Safari support */
+        border: 1px solid rgba(255, 255, 255, 0.8); /* More prominent white border */
+    }
+
+    .modal-backdrop.show .custom-modal {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .custom-modal h5 {
+        margin-bottom: 1.5rem;
+        color: #34495E;
+        font-weight: 600;
+    }
+
+    .modal-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+        .modal-buttons .btn {
+            min-width: 80px; /* Ensure buttons have a consistent minimum width */
+        }
+
+</style>
+
+<div class="list-container">
+    @* Use Bootstrap heading and margin utility *@
+    <h1 class="mb-4">Your Enrolled Policies</h1>
+
+    @* Display Employee Name if available *@
+    @if (ViewBag.EmployeeName != null)
+    {
+        <h4 class="mb-3">Employee: @ViewBag.EmployeeName</h4> @* Added margin-bottom *@
+    }
+
+
+    @* Apply Bootstrap table classes for styling *@
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Policy.PolicyName) @* Display Policy Name from the related Policy *@
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Policy.CoverageAmount) @* Display Coverage Amount from the related Policy *@
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.EnrollmentDate)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Status)
+                    </th>
+                    <th></th> @* Column for action links (Cancel) *@
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Policy.PolicyName)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Policy.CoverageAmount)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.EnrollmentDate)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Status)
+                        </td>
+                        <td>
+                            @* Form for cancelling enrollment with Bootstrap button class *@
+                            @* Need to pass EnrollmentId and EmployeeId for redirection *@
+                            <form asp-action="CancelEnrollment" method="post" class="cancel-enrollment-form">
+                                <input type="hidden" name="enrollmentId" value="@item.EnrollmentId" />
+                                <input type="hidden" name="employeeId" value="@item.EmployeeId" /> @* Pass EmployeeId for redirection *@
+                                @* Use Bootstrap button class and custom modal for confirmation *@
+                                <button type="button" class="btn btn-danger btn-sm cancel-button">Cancel</button>
+                                @* Add CSRF token *@
+                                @Html.AntiForgeryToken()
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
     </div>
-}
 
-<div class="mt-3">
-    @* Added margin-top *@
-    @* Link back to the list of available policies *@
-    <a asp-action="Index">View Available Policies</a>
+    @* Display error message with Bootstrap alert classes *@
+    @if (ViewBag.ErrorMessage != null)
+    {
+        <div class="alert alert-danger mt-3">
+            @ViewBag.ErrorMessage
+        </div>
+    }
+
+    <div class="mt-3">
+        @* Added margin-top *@
+        @* Link back to the list of available policies *@
+        <a asp-action="Index" class="back-to-list">View Available Policies</a>
+    </div>
 </div>
 
+@* Custom Confirmation Modal *@
+<div id="confirmationModal" class="modal-backdrop">
+    <div class="custom-modal">
+        <h5 class="modal-title">Confirm Cancellation</h5>
+        <p>Are you sure you want to cancel this enrollment?</p>
+        <div class="modal-buttons">
+            <button type="button" class="btn btn-secondary" id="cancelModalBtn">No</button>
+            <button type="button" class="btn btn-danger" id="confirmModalBtn">Yes, Cancel</button>
+        </div>
+    </div>
+</div>
 
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const modal = document.getElementById('confirmationModal');
+            const cancelModalBtn = document.getElementById('cancelModalBtn');
+            const confirmModalBtn = document.getElementById('confirmModalBtn');
+            let formToSubmit = null; // To store the form that triggered the modal
+
+            // Add event listeners to all "Cancel" buttons
+            document.querySelectorAll('.cancel-button').forEach(button => {
+                button.addEventListener('click', function () {
+                    formToSubmit = this.closest('form'); // Get the parent form
+                    modal.classList.add('show'); // Show the modal
+                });
+            });
+
+            // Event listener for the "No" button in the modal
+            cancelModalBtn.addEventListener('click', function () {
+                modal.classList.remove('show'); // Hide the modal
+                formToSubmit = null; // Clear the stored form
+            });
+
+            // Event listener for the "Yes, Cancel" button in the modal
+            confirmModalBtn.addEventListener('click', function () {
+                if (formToSubmit) {
+                    formToSubmit.submit(); // Submit the stored form
+                }
+                modal.classList.remove('show'); // Hide the modal
+            });
+        });
+    </script>
+}

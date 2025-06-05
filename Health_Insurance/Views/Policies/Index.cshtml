@@ -1,53 +1,295 @@
 ﻿@model IEnumerable<Health_Insurance.Models.Policy>
+@* Ensure the model namespace is correct based on your project name *@
 
 @{
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<style>
+    /* Custom styles for professional aesthetics and subtle animations */
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.PolicyName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CoverageAmount)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PremiumAmount)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PolicyType)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.PolicyName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CoverageAmount)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PremiumAmount)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PolicyType)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.PolicyId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.PolicyId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.PolicyId">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+    /* General body styling for a clean, light background with aurora effect */
+    body {
+        /* Aurora-like background with light, ethereal shades - professional color combination */
+        background: radial-gradient(at 20% 80%, rgba(150, 200, 255, 0.7) 0%, transparent 55%), /* Brighter Light Blue */
+        radial-gradient(at 80% 20%, rgba(200, 180, 230, 0.7) 0%, transparent 55%), /* Subtle Lavender/Purple */
+        radial-gradient(at 50% 50%, rgba(180, 255, 200, 0.7) 0%, transparent 65%); /* Brighter Light Mint Green */
+        background-color: #EBF3F8; /* A slightly deeper light blue fallback */
+        font-family: 'Inter', sans-serif; /* Modern and clean font */
+        color: #34495E; /* Dark gray for general text for good readability */
+        min-height: 100vh; /* Ensure body takes full viewport height */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start; /* Align content to top for list view */
+        overflow-x: hidden; /* Prevent horizontal scroll */
+        position: relative; /* For background positioning */
+        padding-top: 2.5rem; /* Add some top padding */
+        padding-bottom: 2.5rem; /* Add some bottom padding */
+    }
+
+    /* Container styling for a sophisticated card-like appearance (for the whole list/table) */
+    .list-container {
+        background-color: rgba(255, 255, 255, 0.2); /* More translucent white for a pronounced glass effect */
+        padding: 3rem; /* Increased padding for a more spacious feel */
+        border-radius: 1.25rem; /* Even larger rounded corners for a softer, premium look */
+        box-shadow: 0 0.75rem 2.5rem rgba(0, 0, 0, 0.1); /* Softer, deeper shadow for elegant depth */
+        margin: 2.5rem auto; /* Center horizontally and provide vertical margin */
+        backdrop-filter: blur(20px); /* Increased blur for stronger glass effect */
+        -webkit-backdrop-filter: blur(20px); /* Safari support */
+        border: 1px solid rgba(255, 255, 255, 0.6); /* More prominent white border for definition */
+        max-width: 1000px; /* Max width for the table container */
+        width: 90%; /* Responsive width */
+        position: relative;
+        transition: box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out; /* Smooth transition for uplift */
+    }
+
+        .list-container:hover {
+            box-shadow: 0 1.2rem 4rem rgba(0, 0, 0, 0.15); /* More pronounced shadow on hover */
+            transform: translateY(-5px); /* Slight uplift effect on hover */
+        }
+
+    /* Heading styling for prominence and clarity */
+    h1 {
+        color: #2C3E50; /* Deep, dark blue/charcoal for a strong heading */
+        font-weight: 700; /* Bolder font for significant emphasis */
+        border-bottom: 1px solid rgba(224, 230, 233, 0.5); /* Very subtle, slightly translucent bottom border */
+        padding-bottom: 1rem; /* Generous space below the border */
+        margin-bottom: 2rem; /* More space below the heading */
+    }
+
+    /* Table styling for a refined data presentation */
+    .table {
+        border-radius: 1rem; /* Rounded corners for the entire table */
+        overflow: hidden; /* Ensures rounded corners are applied correctly */
+        margin-top: 2rem; /* Ample space above the table */
+        box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.08); /* Subtle shadow for the table */
+        border-collapse: separate; /* Required for border-radius on table */
+        border-spacing: 0; /* Remove spacing between cells */
+        background-color: rgba(255, 255, 255, 0.3); /* Slightly more opaque for differentiation */
+        backdrop-filter: blur(10px); /* Different blur value for differentiation */
+        -webkit-backdrop-filter: blur(10px); /* Safari support */
+        border: 1px solid rgba(255, 255, 255, 0.4); /* Slightly more prominent border */
+        table-layout: fixed; /* Ensures column widths are respected and content wraps */
+    }
+
+        .table thead th {
+            background-color: rgba(44, 62, 80, 0.85); /* Slightly translucent deep blue/charcoal for header */
+            color: white; /* Crisp white text for high contrast */
+            font-weight: 600; /* Bolder header text for readability */
+            vertical-align: middle; /* Center align text vertically */
+            padding: 1.2rem 1.5rem; /* More padding in header cells for spaciousness */
+            border-bottom: none; /* Remove default border-bottom */
+            text-align: left; /* Align header text to the left */
+        }
+
+            /* Column widths for responsiveness */
+            .table thead th:nth-child(1) {
+                width: 20%;
+            }
+            /* PolicyName */
+            .table thead th:nth-child(2) {
+                width: 18%;
+            }
+            /* CoverageAmount */
+            .table thead th:nth-child(3) {
+                width: 18%;
+            }
+            /* PremiumAmount */
+            .table thead th:nth-child(4) {
+                width: 15%;
+            }
+            /* PolicyType */
+            .table thead th:nth-child(5) {
+                width: 29%;
+            }
+        /* Actions */
+
+
+        .table tbody tr {
+            transition: all 0.3s ease-in-out; /* Smooth transition for all properties on row hover */
+        }
+
+            .table tbody tr:hover {
+                background-color: rgba(236, 240, 241, 0.5); /* Adjusted translucency for hover */
+                transform: translateY(-3px); /* Slightly more pronounced lift effect on hover */
+                box-shadow: 0 0.4rem 1rem rgba(0, 0, 0, 0.06); /* Enhanced shadow on hover */
+            }
+
+        .table tbody td {
+            vertical-align: middle; /* Center align text vertically in body cells */
+            padding: 1rem 1.5rem; /* Consistent and generous padding for body cells */
+            border-top: 1px solid rgba(224, 230, 233, 0.5); /* Subtle translucent top border for row separation */
+            word-wrap: break-word; /* Ensure text wraps within cells */
+            overflow-wrap: break-word; /* Ensure text wraps within cells */
+        }
+
+            .table tbody td:last-child { /* Actions column */
+                text-align: center; /* Center align content in the actions column */
+            }
+
+    /* Button styling for a modern, interactive feel */
+    .btn {
+        border-radius: 0.6rem; /* Rounded corners for individual buttons */
+        padding: 0.6rem 1.2rem; /* Decreased padding for default buttons like "Create New" */
+        font-weight: 500; /* Medium font weight for text */
+        text-transform: uppercase; /* Uppercase text for a professional touch */
+        box-shadow: 0 0.25rem 0.6rem rgba(0, 0, 0, 0.1); /* Subtle shadow for buttons */
+        font-size: 0.75rem; /* Decreased font size for default buttons */
+        position: relative; /* Needed for pseudo-element positioning */
+        overflow: hidden; /* To clip the pseudo-element */
+        z-index: 1; /* Ensure text is above pseudo-element */
+        transition: color 0.3s ease, transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease; /* Only text color transition */
+        background-color: transparent; /* Start with transparent background */
+        white-space: nowrap; /* Keep text on a single line */
+    }
+
+        /* Smaller size for table action buttons */
+        .btn.btn-sm { /* Target .btn elements that also have .btn-sm */
+            padding: 0.3rem 0.6rem; /* Original smaller padding */
+            font-size: 0.6rem; /* Original smaller font size */
+        }
+
+
+        /* Pseudo-element for the water spilling effect */
+        .btn::before { /* Apply to all buttons with .btn */
+            content: '';
+            position: absolute;
+            bottom: 0; /* Start from the bottom */
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 0.6rem; /* Match button border-radius */
+            z-index: -1; /* Behind the button text */
+            transform: scaleY(0); /* Start hidden at the bottom */
+            transform-origin: bottom; /* Animate from bottom up */
+            transition: transform 0.3s ease-out; /* Animation for the fill */
+        }
+
+        .btn:hover::before {
+            transform: scaleY(1); /* Fill up on hover */
+        }
+
+        .btn:hover {
+            transform: translateY(-2px); /* Slight lift on hover */
+            box-shadow: 0 0.4rem 0.8rem rgba(0, 0, 0, 0.15); /* More pronounced shadow on hover */
+            color: white; /* Text turns white on hover */
+        }
+
+    /* New flex container for action buttons in table rows */
+    .action-buttons-group {
+        display: flex; /* Use flexbox to arrange buttons horizontally */
+        flex-wrap: nowrap; /* Prevent buttons from wrapping to the next line */
+        gap: 0.2rem; /* Reduced gap between buttons for distinct appearance */
+        justify-content: center; /* Center align buttons in the column */
+        align-items: center; /* Vertically align buttons */
+        height: 100%; /* Ensure flex container takes full height of cell */
+    }
+
+
+    /* Specific button color adjustments for a palette */
+    .btn-primary { /* Used for "Create New" button and "Edit" in table */
+        border: 1px solid #007bff; /* A standard, professional blue outline */
+        color: #007bff; /* Text color matches outline */
+    }
+
+        .btn-primary::before {
+            background-color: #0056b3; /* Darker blue fill color for primary button on hover */
+        }
+
+        .btn-primary:hover {
+            border-color: #0056b3; /* Darker blue outline on hover */
+        }
+
+    .btn-info { /* Used for "Details" in table */
+        border: 1px solid #2ECC71; /* Emerald green outline */
+        color: #2ECC71; /* Text color matches outline */
+    }
+
+        .btn-info::before {
+            background-color: #27AE60; /* Darker green fill color for info button */
+        }
+
+        .btn-info:hover {
+            border-color: #27AE60; /* Darker green outline on hover */
+        }
+
+    .btn-danger { /* Used for "Delete" in table */
+        border: 1px solid #E74C3C; /* Alizarin red outline */
+        color: #E74C3C; /* Text color matches outline */
+    }
+
+        .btn-danger::before {
+            background-color: #C0392B; /* Darker red fill color for danger button on hover */
+        }
+
+        .btn-danger:hover {
+            border-color: #C0392B; /* Darker red outline on hover */
+        }
+
+    /* Error message styling */
+    .alert-danger {
+        border-radius: 0.6rem; /* Rounded corners for the alert box */
+        font-weight: 500; /* Medium font weight */
+        background-color: #FEECEB; /* Lighter red background for alert */
+        color: #C0392B; /* Darker red text for alert */
+        border-color: #E74C3C; /* Red border for alert */
+        padding: 1rem 1.5rem; /* More padding for alerts */
+        margin-top: 1.5rem; /* Space from table */
+    }
+</style>
+
+<div class="list-container">
+    <h1>Index</h1>
+
+    <p>
+        <a asp-action="Create" class="btn btn-primary mb-3">Create New</a>
+    </p>
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered table-hover mt-3">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.PolicyName)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.CoverageAmount)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.PremiumAmount)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.PolicyType)
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.PolicyName)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.CoverageAmount)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.PremiumAmount)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.PolicyType)
+                        </td>
+                        <td>
+                            <div class="action-buttons-group">
+                                <a asp-action="Edit" asp-route-id="@item.PolicyId" class="btn btn-sm btn-primary">Edit</a>
+                                <a asp-action="Details" asp-route-id="@item.PolicyId" class="btn btn-sm btn-info">Details</a>
+                                <a asp-action="Delete" asp-route-id="@item.PolicyId" class="btn btn-sm btn-danger">Delete</a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

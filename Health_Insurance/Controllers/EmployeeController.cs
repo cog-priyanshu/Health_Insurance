@@ -146,6 +146,53 @@ namespace Health_Insurance.Controllers
             return View(employee);
         }
 
+        // POST: /Employee/UpdateEmployee/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateEmployee(int id, [Bind("EmployeeId,Name,Email,Phone,Address,Designation,OrganizationId,Username,PasswordHash")] Employee employee)
+        {
+            if (id != employee.EmployeeId)
+            {
+                return NotFound();
+            }
+
+            if (!string.IsNullOrEmpty(employee.PasswordHash))
+            {
+                employee.PasswordHash = BCrypt.Net.BCrypt.HashPassword(employee.PasswordHash);
+            }
+            else
+            {
+                var existingEmployee = await _context.Employees.AsNoTracking().FirstOrDefaultAsync(e => e.EmployeeId == id);
+                if (existingEmployee != null)
+                {
+                    employee.PasswordHash = existingEmployee.PasswordHash;
+                }
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _context.Update(employee);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!_context.Employees.Any(e => e.EmployeeId == employee.EmployeeId))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction(nameof(Index));
+            }
+            ViewData["OrganizationId"] = new SelectList(_context.Organizations, "OrganizationId", "OrganizationName", employee.OrganizationId);
+            return View(employee);
+        }
+
         // GET: /Employee/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {

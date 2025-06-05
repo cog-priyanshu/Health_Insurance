@@ -1,42 +1,216 @@
 ﻿@model Health_Insurance.Models.Policy
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Edit";
 }
 
-<h1>Details</h1>
+<style>
+    /* Custom styles for professional aesthetics and subtle animations */
 
-<div>
+    /* General body styling for a clean, light background with aurora effect */
+    body {
+        /* Aurora-like background with light, ethereal shades - professional color combination */
+        background: radial-gradient(at 20% 80%, rgba(150, 200, 255, 0.7) 0%, transparent 55%), /* Brighter Light Blue */
+        radial-gradient(at 80% 20%, rgba(200, 180, 230, 0.7) 0%, transparent 55%), /* Subtle Lavender/Purple */
+        radial-gradient(at 50% 50%, rgba(180, 255, 200, 0.7) 0%, transparent 65%); /* Brighter Light Mint Green */
+        background-color: #EBF3F8; /* A slightly deeper light blue fallback */
+        font-family: 'Inter', sans-serif; /* Modern and clean font */
+        color: #34495E; /* Dark gray for general text for good readability */
+        min-height: 100vh; /* Ensure body takes full viewport height */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        overflow-x: hidden; /* Prevent horizontal scroll */
+        position: relative; /* For background positioning */
+    }
+
+    /* Container styling for a sophisticated card-like appearance (for the form) */
+    .form-container {
+        background-color: rgba(255, 255, 255, 0.2); /* More translucent white for a pronounced glass effect */
+        padding: 3rem; /* Increased padding for a more spacious feel */
+        border-radius: 1.25rem; /* Even larger rounded corners for a softer, premium look */
+        box-shadow: 0 0.75rem 2.5rem rgba(0, 0, 0, 0.1); /* Softer, deeper shadow for elegant depth */
+        margin: auto; /* Center horizontally and provide vertical margin */
+        backdrop-filter: blur(20px); /* Increased blur for stronger glass effect */
+        -webkit-backdrop-filter: blur(20px); /* Safari support */
+        border: 1px solid rgba(255, 255, 255, 0.6); /* More prominent white border for definition */
+        max-width: 600px; /* Max width for the form container */
+        width: 90%; /* Responsive width */
+        position: relative;
+        transition: box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out; /* Smooth transition for uplift */
+    }
+
+        .form-container:hover {
+            box-shadow: 0 1.2rem 4rem rgba(0, 0, 0, 0.15); /* More pronounced shadow on hover */
+            transform: translateY(-5px); /* Slight uplift effect on hover */
+        }
+
+    /* Heading styling for prominence and clarity */
+    h1 {
+        color: #2C3E50; /* Deep, dark blue/charcoal for a strong heading */
+        font-weight: 700; /* Bolder font for significant emphasis */
+        border-bottom: 1px solid rgba(224, 230, 233, 0.5); /* Very subtle, slightly translucent bottom border */
+        padding-bottom: 1rem; /* Generous space below the border */
+        margin-bottom: 2rem; /* More space below the heading */
+    }
+
+    h4 { /* For "Policy" sub-heading */
+        color: #34495E; /* Dark gray for sub-heading */
+        margin-bottom: 1.5rem;
+    }
+
+    /* Form group styling */
+    .form-group {
+        margin-bottom: 1.5rem; /* Space between form fields */
+    }
+
+    .control-label, .form-label { /* Combined for consistency */
+        font-weight: 600; /* Bolder labels */
+        color: #34495E; /* Darker label color */
+        margin-bottom: 0.5rem; /* Space between label and input */
+        display: block; /* Ensure label takes full width */
+    }
+
+    .form-control {
+        border-radius: 0.5rem; /* Rounded input fields */
+        border: 1px solid rgba(255, 255, 255, 0.6); /* More prominent white border for inputs */
+        padding: 0.75rem 1rem; /* Comfortable padding */
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05); /* Inner shadow for depth */
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        background-color: rgba(255, 255, 255, 0.15); /* Translucent white background for inputs */
+        backdrop-filter: blur(10px); /* Apply blur to the input itself */
+        -webkit-backdrop-filter: blur(10px); /* Safari support */
+        color: #34495E; /* Ensure text color is readable on the translucent background */
+    }
+
+        .form-control:focus {
+            border-color: #88BBDD; /* Highlight on focus */
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05), 0 0 0 0.2rem rgba(52, 152, 219, 0.25); /* Subtle blue focus ring */
+            outline: none; /* Remove default outline */
+        }
+
+    .text-danger {
+        color: #E74C3C; /* Red for validation messages */
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: block;
+    }
+
+    /* Button styling for a modern, interactive feel */
+    .btn {
+        border-radius: 0.6rem; /* Rounded corners for individual buttons */
+        padding: 0.5rem 1rem; /* Reduced padding for smaller buttons */
+        font-weight: 500; /* Medium font weight for text */
+        text-transform: uppercase; /* Uppercase text for a professional touch */
+        box-shadow: 0 0.25rem 0.6rem rgba(0, 0, 0, 0.1); /* Subtle shadow for buttons */
+        font-size: 0.75rem; /* Reduced font size for smaller buttons */
+        position: relative; /* Needed for pseudo-element positioning */
+        overflow: hidden; /* To clip the pseudo-element */
+        z-index: 1; /* Ensure text is above pseudo-element */
+        transition: color 0.3s ease, transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease; /* Only text color transition */
+        background-color: transparent; /* Start with transparent background */
+    }
+
+        /* Pseudo-element for the water spilling effect */
+        .btn::before { /* Apply to all buttons with .btn */
+            content: '';
+            position: absolute;
+            bottom: 0; /* Start from the bottom */
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 0.6rem; /* Match button border-radius */
+            z-index: -1; /* Behind the button text */
+            transform: scaleY(0); /* Start hidden at the bottom */
+            transform-origin: bottom; /* Animate from bottom up */
+            transition: transform 0.3s ease-out; /* Animation for the fill */
+        }
+
+        .btn:hover::before {
+            transform: scaleY(1); /* Fill up on hover */
+        }
+
+        .btn:hover {
+            transform: translateY(-2px); /* Slight lift on hover */
+            box-shadow: 0 0.4rem 0.8rem rgba(0, 0, 0, 0.15); /* More pronounced shadow on hover */
+            color: white; /* Text turns white on hover */
+        }
+
+    /* Specific button color adjustments for a palette */
+    .btn-primary { /* Used for "Save" button */
+        border: 1px solid #007bff; /* A standard, professional blue outline */
+        color: #007bff; /* Text color matches outline */
+    }
+
+        .btn-primary::before {
+            background-color: #0056b3; /* Darker blue fill color for primary button on hover */
+        }
+
+        .btn-primary:hover {
+            border-color: #0056b3; /* Darker blue outline on hover */
+        }
+
+    /* Back to List link styling */
+    .back-to-list {
+        margin-top: 2rem;
+        font-size: 1rem;
+        color: #007bff; /* Match primary button color */
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+        .back-to-list:hover {
+            color: #0056b3; /* Darker blue on hover */
+            text-decoration: underline;
+        }
+</style>
+
+<div class="form-container">
+    <h1>Edit</h1>
+
     <h4>Policy</h4>
     <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PolicyName)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PolicyName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CoverageAmount)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CoverageAmount)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PremiumAmount)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PremiumAmount)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PolicyType)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PolicyType)
-        </dd>
-    </dl>
+    <div class="row">
+        <div class="col-md-12">
+            @* Changed to col-md-12 to ensure form takes full width of its container *@
+            <form asp-action="Edit">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="PolicyId" />
+                <div class="form-group">
+                    <label asp-for="PolicyName" class="control-label"></label>
+                    <input asp-for="PolicyName" class="form-control" />
+                    <span asp-validation-for="PolicyName" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="CoverageAmount" class="control-label"></label>
+                    <input asp-for="CoverageAmount" class="form-control" />
+                    <span asp-validation-for="CoverageAmount" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="PremiumAmount" class="control-label"></label>
+                    <input asp-for="PremiumAmount" class="form-control" />
+                    <span asp-validation-for="PremiumAmount" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="PolicyType" class="control-label"></label>
+                    <input asp-for="PolicyType" class="form-control" />
+                    <span asp-validation-for="PolicyType" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <input type="submit" value="Save" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div>
+        <a asp-action="Index" class="back-to-list">Back to List</a>
+    </div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.PolicyId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
